@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE and local settings
+.vscode/
+.env
+
+# Dataset files: do not upload raw videos/audio to GitHub
+data/raw/*
+!data/raw/.gitkeep
+
+data/processed/*
+!data/processed/.gitkeep
+
+# Model checkpoints may be large
+checkpoints/*
+!checkpoints/.gitkeep
+
+# Generated training runs
+results/runs/
+
+# Logs
+*.log
