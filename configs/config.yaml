@@ -1,0 +1,24 @@
+
+project:
+  name: "Multimodal Deepfake Audio-Video Detection"
+  seed: 42
+
+data:
+  window_duration: 5
+  frames_per_window: 16
+  image_size: 224
+  sample_rate: 16000
+  audio_sample_rate: 16000
+
+model:
+  visual_backbone: "resnet50"
+  temporal_model: "bilstm"
+  audio_model: "cnn"
+  fusion: "reliability_aware"
+
+training:
+  batch_size: 4
+  epochs: 10
+  learning_rate: 0.0001
+
+device: "auto"
