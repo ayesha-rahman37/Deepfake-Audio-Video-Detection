@@ -1,3 +1,4 @@
+import os
 
 import csv
 import json
@@ -17,7 +18,9 @@ from torchvision import transforms
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATASET_ROOT = Path(r"D:\LAV-DF")
+DATASET_ROOT = Path(
+    os.environ.get("LAVDF_ROOT", r"D:\LAV-DF")
+).expanduser()
 METADATA_CSV = PROJECT_ROOT / "data" / "metadata" / "lavdf_metadata.csv"
 CONFIG_PATH = PROJECT_ROOT / "configs" / "config.yaml"
 
