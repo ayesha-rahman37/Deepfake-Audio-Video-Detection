@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from models.audio_encoder import AudioEncoder  # noqa: E402
+from utils.device import device  # noqa: E402
 
 CONFIG_PATH = PROJECT_ROOT / "configs" / "config.yaml"
 CHECKPOINT_PATH = PROJECT_ROOT / "checkpoints" / "audio_encoder.pt"
@@ -128,8 +129,6 @@ def main():
     batch_size = int(settings["batch_size"])
     lr = float(settings["learning_rate"])
 
-    # TODO: switch to Ayesha's utils/device.py after checking its function name.
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device:", device)
 
     if args.dummy:
