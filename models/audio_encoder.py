@@ -38,6 +38,9 @@ class AudioEncoder(nn.Module):
     def forward(self, x):
         if x.dim() == 3:
             x = x.unsqueeze(1)  # add channel dimension
+        # 4 pooling layers halve the time axis, so at least 16 frames are needed.
+        if x.shape[-1] < 16:
+            x = nn.functional.pad(x, (0, 16 - x.shape[-1]))
         x = self.features(x)
         x = self.pool(x)
         emb = self.embedding(x)
