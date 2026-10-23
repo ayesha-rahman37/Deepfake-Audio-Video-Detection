@@ -1,0 +1,27 @@
+{
+  "warning": "Small smoke-test subsets are not publishable final evaluation results.",
+  "device": "cuda",
+  "history": [
+    {
+      "epoch": 1,
+      "train": {
+        "loss": 0.6952454671263695,
+        "accuracy": 0.5,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "samples": 8,
+        "roc_auc": 0.375
+      },
+      "validation": {
+        "loss": 0.6921392530202866,
+        "accuracy": 0.5,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "samples": 4,
+        "roc_auc": 1.0
+      }
+    }
+  ]
+}
