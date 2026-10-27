@@ -1,0 +1,1 @@
+"""Components for the deepfake detection Streamlit app."""
