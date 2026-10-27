@@ -3,27 +3,27 @@
   "fusion_mode": "reliability",
   "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
   "checkpoint_epoch": 2,
-  "samples": 256,
+  "samples": 1024,
   "class_counts": {
-    "real": 128,
-    "fake": 128
+    "real": 512,
+    "fake": 512
   },
-  "loss_unweighted": 0.6344295488670468,
-  "accuracy": 0.7265625,
-  "balanced_accuracy": 0.7265625,
-  "precision_fake": 0.6593406593406593,
-  "recall_fake": 0.9375,
-  "f1_fake": 0.7741935483870968,
-  "macro_f1": 0.7138294474608751,
-  "roc_auc": 0.808349609375,
+  "loss_unweighted": 0.6377712322282605,
+  "accuracy": 0.712890625,
+  "balanced_accuracy": 0.712890625,
+  "precision_fake": 0.6497252747252747,
+  "recall_fake": 0.923828125,
+  "f1_fake": 0.7629032258064516,
+  "macro_f1": 0.699520919833919,
+  "roc_auc": 0.7943115234375,
   "confusion_matrix_labels_0_1": [
     [
-      66,
-      62
+      257,
+      255
     ],
     [
-      8,
-      120
+      39,
+      473
     ]
   ],
   "note": "Interpret subset evaluation as pilot only; final metrics require the full fixed test split."
