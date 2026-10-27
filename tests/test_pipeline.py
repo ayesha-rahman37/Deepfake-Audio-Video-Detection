@@ -81,3 +81,16 @@ def test_pipeline_propagates_processing_error(tmp_path):
 
     with pytest.raises(RuntimeError, match="Preprocessing failed"):
         run_pipeline(video, preprocess, inference)
+
+def test_pipeline_propagates_inference_error(tmp_path):
+    video = tmp_path / "sample.mp4"
+    video.write_bytes(b"sample video")
+
+    def preprocess(path):
+        return {"frames": [1, 2, 3]}
+
+    def broken_inference(data):
+        raise RuntimeError("Inference failed")
+
+    with pytest.raises(RuntimeError, match="Inference failed"):
+        run_pipeline(video, preprocess, broken_inference)
