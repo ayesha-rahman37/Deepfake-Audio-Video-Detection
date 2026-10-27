@@ -1,4 +1,4 @@
-
+```python
 from pathlib import Path
 
 import streamlit as st
@@ -11,12 +11,47 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("🎥 Deepfake Audio-Video Detection")
-st.write(
-    "Upload a video to validate the file and check "
-    "whether a trained prediction model is available."
+# Styling
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: #f4f7fb;
+        color: #182230;
+    }
+    .block-container {
+        max-width: 1120px;
+        padding-top: 1.5rem;
+    }
+    .hero {
+        background: linear-gradient(120deg, #ffffff, #eaf1ff);
+        border: 1px solid #d8e4ff;
+        border-radius: 18px;
+        padding: 25px;
+        margin-bottom: 22px;
+    }
+    .hero-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #182230;
+    }
+    .hero-copy {
+        color: #475467;
+        line-height: 1.6;
+    }
+    .stButton > button {
+        background: #2457d6;
+        color: white;
+        border-radius: 10px;
+        min-height: 44px;
+        font-weight: 700;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
+# Find model checkpoint files
 checkpoint_dir = Path("checkpoints")
 checkpoint_files = (
     [
@@ -29,8 +64,54 @@ checkpoint_files = (
     else []
 )
 
+# Sidebar
+with st.sidebar:
+    st.markdown("## 🎬 AI Detection Lab")
+    st.caption("Multimodal research prototype")
+    st.divider()
+    st.markdown("### Workspace")
+    st.write("📁 Video analysis")
+    st.write("🖼️ Visual analysis")
+    st.write("🔊 Audio analysis")
+    st.write("🧠 Multimodal prediction")
+    st.divider()
+    st.markdown("### Model status")
+
+    if checkpoint_files:
+        st.success(f"{len(checkpoint_files)} checkpoint file(s) found")
+    else:
+        st.warning("No checkpoint file found")
+
+    st.caption(
+        "A checkpoint file alone does not confirm that inference is ready."
+    )
+
+# Header
+st.markdown(
+    """
+    <div class="hero">
+        <div class="hero-title">🎥 Deepfake Audio-Video Detection</div>
+        <p class="hero-copy">
+            Upload and preview a video. Model-based detection requires
+            a connected preprocessing and inference pipeline.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Overview
+col1, col2, col3 = st.columns(3)
+col1.metric("Input", "Video upload")
+col2.metric("Maximum size", "200 MB")
+col3.metric("Model assets", "Found" if checkpoint_files else "Not found")
+
+# Upload section
+st.subheader("01 · Upload video")
+st.caption("Supported formats: MP4, MOV, AVI, MKV and WEBM.")
+
 uploaded_file = st.file_uploader(
-    "Upload a video",
+    "Choose a video",
     type=["mp4", "mov", "avi", "mkv", "webm"],
 )
 
@@ -59,8 +140,8 @@ if uploaded_file is not None:
 
                     if not checkpoint_files:
                         raise FileNotFoundError(
-                            "No compatible trained model checkpoint "
-                            "was found in the checkpoints folder."
+                            "No compatible model checkpoint was found "
+                            "in the checkpoints folder."
                         )
 
                     st.write("Step 2: Checking model availability.")
@@ -85,3 +166,9 @@ if uploaded_file is not None:
                     st.error(
                         f"Video processing could not be completed: {error}"
                     )
+
+st.divider()
+st.caption(
+    "AI Detection Lab · Research Prototype · Predictions require "
+    "a connected trained inference pipeline."
+)
