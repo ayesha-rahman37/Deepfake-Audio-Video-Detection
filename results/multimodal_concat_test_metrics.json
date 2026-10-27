@@ -1,0 +1,30 @@
+{
+  "split": "test",
+  "fusion_mode": "concat",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_concat_best.pt",
+  "checkpoint_epoch": 1,
+  "samples": 256,
+  "class_counts": {
+    "real": 128,
+    "fake": 128
+  },
+  "loss_unweighted": 0.6551974937319756,
+  "accuracy": 0.6640625,
+  "balanced_accuracy": 0.6640625,
+  "precision_fake": 0.6179775280898876,
+  "recall_fake": 0.859375,
+  "f1_fake": 0.7189542483660131,
+  "macro_f1": 0.6507392601053366,
+  "roc_auc": 0.69818115234375,
+  "confusion_matrix_labels_0_1": [
+    [
+      60,
+      68
+    ],
+    [
+      18,
+      110
+    ]
+  ],
+  "note": "Interpret subset evaluation as pilot only; final metrics require the full fixed test split."
+}
