@@ -18,12 +18,16 @@ st.write(
 )
 
 checkpoint_dir = Path("checkpoints")
-checkpoint_files = [
-    path
-    for path in checkpoint_dir.rglob("*")
-    if path.is_file()
-    and path.suffix.lower() in {".pt", ".pth", ".ckpt", ".onnx"}
-] if checkpoint_dir.exists() else []
+checkpoint_files = (
+    [
+        path
+        for path in checkpoint_dir.rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in {".pt", ".pth", ".ckpt", ".onnx"}
+    ]
+    if checkpoint_dir.exists()
+    else []
+)
 
 uploaded_file = st.file_uploader(
     "Upload a video",
@@ -46,13 +50,38 @@ if uploaded_file is not None:
             )
 
         if st.button("Process Video", type="primary"):
-            if not checkpoint_files:
-                st.error(
-                    "Processing stopped: provide a compatible trained "
-                    "model checkpoint before running inference."
-                )
-            else:
-                st.warning(
-                    "A checkpoint exists, but model loading and inference "
-                    "are not connected yet."
-                )
+            with st.status(
+                "Starting video processing...",
+                expanded=True,
+            ) as status:
+                try:
+                    st.write("Step 1: Upload validation completed.")
+
+                    if not checkpoint_files:
+                        raise FileNotFoundError(
+                            "No compatible trained model checkpoint "
+                            "was found in the checkpoints folder."
+                        )
+
+                    st.write("Step 2: Checking model availability.")
+
+                    raise RuntimeError(
+                        "Model loading and inference are not connected "
+                        "to the application yet."
+                    )
+
+                except FileNotFoundError as error:
+                    status.update(
+                        label="Processing failed",
+                        state="error",
+                    )
+                    st.error(str(error))
+
+                except Exception as error:
+                    status.update(
+                        label="Processing failed",
+                        state="error",
+                    )
+                    st.error(
+                        f"Video processing could not be completed: {error}"
+                    )
