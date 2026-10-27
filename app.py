@@ -1,8 +1,16 @@
 
 from pathlib import Path
+import os
+import tempfile
 
 import streamlit as st
 from app_components.validation import validate_uploaded_file
+from inference.predict_video import predict_video
+
+
+# --------------------------------------------------
+# APP CONFIGURATION
+# --------------------------------------------------
 
 st.set_page_config(
     page_title="Deepfake Detection | AI Research Lab",
@@ -23,6 +31,11 @@ checkpoint_files = (
     if CHECKPOINT_DIR.exists()
     else []
 )
+
+
+# --------------------------------------------------
+# LIGHT THEME UI
+# --------------------------------------------------
 
 st.markdown(
     """
@@ -165,7 +178,6 @@ st.markdown(
         color: #263449;
     }
 
-    /* Compact video preview with a maximum 280px height. */
     [data-testid="stVideo"] {
         width: 100%;
         max-width: 640px;
@@ -184,7 +196,6 @@ st.markdown(
         border-radius: 13px;
     }
 
-    /* High contrast primary button. */
     .stButton > button,
     .stButton > button[kind="primary"] {
         min-height: 45px;
@@ -264,7 +275,11 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Sidebar
+
+# --------------------------------------------------
+# SIDEBAR
+# --------------------------------------------------
+
 with st.sidebar:
     st.markdown("## 🎬 AI Detection Lab")
     st.caption("Multimodal research prototype")
@@ -289,26 +304,34 @@ with st.sidebar:
         st.warning("No checkpoint file found")
 
     st.caption(
-        "Finding a checkpoint does not confirm that model inference is ready."
+        "A checkpoint file being present does not guarantee "
+        "that the model can make a valid prediction."
     )
 
-# Header
+
+# --------------------------------------------------
+# HEADER
+# --------------------------------------------------
+
 st.markdown(
     """
     <div class="hero">
         <div class="eyebrow">AI-powered media research</div>
         <div class="hero-title">Deepfake Audio-Video Detection</div>
         <p class="hero-copy">
-            Upload a video, review its preview and check the file details.
-            Model-based detection will be available when the trained
-            inference pipeline is connected.
+            Upload a video to analyze its visual and audio information
+            using the project's multimodal deep learning model.
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-# Overview cards
+
+# --------------------------------------------------
+# OVERVIEW CARDS
+# --------------------------------------------------
+
 a, b, c = st.columns(3)
 
 with a:
@@ -346,13 +369,20 @@ with c:
         unsafe_allow_html=True,
     )
 
-# Upload section
+
+# --------------------------------------------------
+# VIDEO UPLOAD
+# --------------------------------------------------
+
 st.markdown(
     '<div class="section-title">01 · Upload video</div>',
     unsafe_allow_html=True,
 )
+
 st.markdown(
-    '<div class="section-copy">Supported formats: MP4, MOV, AVI, MKV and WEBM.</div>',
+    '<div class="section-copy">'
+    'Supported formats: MP4, MOV, AVI, MKV and WEBM.'
+    '</div>',
     unsafe_allow_html=True,
 )
 
@@ -361,6 +391,11 @@ uploaded_file = st.file_uploader(
     type=["mp4", "mov", "avi", "mkv", "webm"],
     help="Choose a video up to 200 MB.",
 )
+
+
+# --------------------------------------------------
+# UPLOAD VALIDATION AND PREVIEW
+# --------------------------------------------------
 
 if uploaded_file is None:
     st.info("Choose a video file to see the preview and file information.")
@@ -381,18 +416,21 @@ else:
             '<div class="section-title">02 · Video preview</div>',
             unsafe_allow_html=True,
         )
+
         st.markdown(
-            '<div class="section-copy">A compact player to review your uploaded video.</div>',
+            '<div class="section-copy">'
+            'Review your uploaded video before starting the analysis.'
+            '</div>',
             unsafe_allow_html=True,
         )
 
-        # Keep the preview centered and compact.
         left, center, right = st.columns([1, 2.8, 1])
 
         with center:
             st.video(uploaded_file)
 
         st.markdown("#### File information")
+
         x, y, z = st.columns(3)
 
         with x:
@@ -404,24 +442,27 @@ else:
         with z:
             st.metric("Validation", "Passed")
 
+
+        # --------------------------------------------------
+        # RUN MODEL INFERENCE
+        # --------------------------------------------------
+
         st.markdown(
             '<div class="section-title">03 · Detection</div>',
             unsafe_allow_html=True,
         )
+
         st.markdown(
-            '<div class="section-copy">The model must be connected before a reliable prediction can be shown.</div>',
+            '<div class="section-copy">'
+            'Analyze the uploaded video using the trained multimodal model.'
+            '</div>',
             unsafe_allow_html=True,
         )
 
-        if checkpoint_files:
+        if not checkpoint_files:
             st.warning(
-                "Checkpoint files were found, but model loading, video/audio "
-                "preprocessing and inference are not connected to this page."
-            )
-        else:
-            st.warning(
-                "No model checkpoint was found. A Real/Fake prediction "
-                "cannot be generated yet."
+                "No checkpoint was found in the checkpoints folder. "
+                "Prediction may fail until the correct checkpoint is available."
             )
 
         if st.button(
@@ -429,16 +470,161 @@ else:
             type="primary",
             use_container_width=True,
         ):
-            st.error(
-                "Analysis has not run: trained-model inference is not "
-                "connected yet. No Real/Fake prediction was generated."
-            )
+            temp_path = None
+
+            try:
+                # Save the uploaded video temporarily so that the
+                # inference pipeline can read it from a file path.
+                with tempfile.NamedTemporaryFile(
+                    delete=False,
+                    suffix=Path(uploaded_file.name).suffix,
+                ) as temp_file:
+                    temp_file.write(uploaded_file.getvalue())
+                    temp_path = temp_file.name
+
+                with st.spinner(
+                    "Analyzing video and audio. This may take a while..."
+                ):
+                    result = predict_video(temp_path)
+
+                if not isinstance(result, dict):
+                    raise ValueError(
+                        "The prediction pipeline did not return a result dictionary."
+                    )
+
+                # Support the common result-key names used by the
+                # inference pipeline.
+                fake_score = result.get(
+                    "fake_score",
+                    result.get("average_fake_score"),
+                )
+
+                real_score = result.get("real_score")
+
+                if fake_score is None:
+                    raise KeyError(
+                        "The inference result does not contain "
+                        "'fake_score' or 'average_fake_score'."
+                    )
+
+                fake_score = float(fake_score)
+
+                if real_score is None:
+                    real_score = 1.0 - fake_score
+
+                real_score = float(real_score)
+
+                # Accept scores returned either as fractions (0–1)
+                # or as percentages (0–100).
+                if fake_score > 1.0:
+                    fake_score /= 100.0
+
+                if real_score > 1.0:
+                    real_score /= 100.0
+
+                if not (0.0 <= fake_score <= 1.0):
+                    raise ValueError("Fake score is outside the valid range.")
+
+                if not (0.0 <= real_score <= 1.0):
+                    raise ValueError("Real score is outside the valid range.")
+
+                prediction = result.get("prediction", result.get("label"))
+
+                if prediction is None:
+                    prediction = "FAKE" if fake_score >= 0.5 else "REAL"
+
+                prediction = str(prediction).upper()
+
+                # Display the prediction.
+                st.markdown("### Detection results")
+
+                if "FAKE" in prediction:
+                    st.error(f"Prediction: {prediction}")
+                elif "REAL" in prediction:
+                    st.success(f"Prediction: {prediction}")
+                else:
+                    st.info(f"Prediction: {prediction}")
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.metric("Prediction", prediction)
+
+                with col2:
+                    st.metric("Fake score", f"{fake_score * 100:.2f}%")
+
+                with col3:
+                    st.metric("Real score", f"{real_score * 100:.2f}%")
+
+                # Additional model information, if returned.
+                duration = result.get("duration")
+                device = result.get("device")
+
+                info_col1, info_col2 = st.columns(2)
+
+                with info_col1:
+                    if duration is not None:
+                        st.metric("Video duration", f"{float(duration):.2f} sec")
+
+                with info_col2:
+                    if device is not None:
+                        st.metric("Inference device", str(device))
+
+                # Display individual-window results when available.
+                windows = result.get(
+                    "windows",
+                    result.get("window_results", []),
+                )
+
+                if windows:
+                    st.markdown("### Window-by-window analysis")
+
+                    if isinstance(windows, list):
+                        st.dataframe(
+                            windows,
+                            use_container_width=True,
+                        )
+                    else:
+                        st.write(windows)
+
+                warning = result.get("warning")
+
+                if warning:
+                    st.warning(str(warning))
+
+                st.info(
+                    "Research prototype: scores are model outputs, "
+                    "not calibrated probabilities or proof that a video "
+                    "is authentic or manipulated."
+                )
+
+            except Exception as exc:
+                st.error(f"Video analysis failed: {exc}")
+
+                st.markdown("**What to check:**")
+                st.markdown(
+                    "- Confirm that the model checkpoint exists.\n"
+                    "- Confirm that the video contains an audio track.\n"
+                    "- Confirm that the configuration and model files are available.\n"
+                    "- Read the full error in the terminal running Streamlit."
+                )
+
+            finally:
+                if temp_path and os.path.exists(temp_path):
+                    try:
+                        os.remove(temp_path)
+                    except OSError:
+                        pass
+
+
+# --------------------------------------------------
+# FOOTER
+# --------------------------------------------------
 
 st.markdown(
     """
     <div class="footer">
-        AI Detection Lab · Research Prototype · Results require a connected
-        trained inference pipeline.
+        AI Detection Lab · Research Prototype · Multimodal Deep Learning
     </div>
     """,
     unsafe_allow_html=True,
