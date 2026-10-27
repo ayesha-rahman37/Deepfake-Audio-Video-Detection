@@ -1,0 +1,77 @@
+{
+  "warning": "Subset runs are pilot results, not final test performance.",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "fusion_mode": "concat",
+  "args": {
+    "max_train_samples": 256,
+    "max_val_samples": 64,
+    "epochs": 2,
+    "batch_size": 2,
+    "learning_rate": 0.0001,
+    "seed": 42,
+    "patience": 3,
+    "fusion_mode": "concat",
+    "no_pretrained_visual": true
+  },
+  "class_counts": {
+    "train": {
+      "real": 128,
+      "fake": 128
+    },
+    "validation": {
+      "real": 32,
+      "fake": 32
+    }
+  },
+  "best_epoch_so_far": 1,
+  "history": [
+    {
+      "epoch": 1,
+      "learning_rate": 0.0001,
+      "train": {
+        "loss": 0.6982237156480551,
+        "accuracy": 0.5234375,
+        "balanced_accuracy": 0.5234375,
+        "precision_fake": 0.5138888888888888,
+        "recall_fake": 0.8671875,
+        "f1_fake": 0.6453488372093024,
+        "macro_f1": 0.4595791805094131,
+        "roc_auc": 0.50250244140625,
+        "samples": 256,
+        "confusion_matrix_labels_0_1": [
+          [
+            23,
+            105
+          ],
+          [
+            17,
+            111
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 0.6579472739249468,
+        "accuracy": 0.640625,
+        "balanced_accuracy": 0.640625,
+        "precision_fake": 0.6097560975609756,
+        "recall_fake": 0.78125,
+        "f1_fake": 0.684931506849315,
+        "macro_f1": 0.6333748443337484,
+        "roc_auc": 0.7001953125,
+        "samples": 64,
+        "confusion_matrix_labels_0_1": [
+          [
+            16,
+            16
+          ],
+          [
+            7,
+            25
+          ]
+        ]
+      },
+      "epoch_seconds": 147.43
+    }
+  ]
+}
