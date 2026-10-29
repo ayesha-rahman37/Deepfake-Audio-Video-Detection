@@ -1,372 +1,215 @@
-from pathlib import Path
+
+"""Streamlit interface for Deepfake Audio-Video Detection."""
+
 import tempfile
+from pathlib import Path
 
 import streamlit as st
 
 from app_components.validation import validate_uploaded_file
-from app_components.inference import analyze_video
-from app_components.results import format_prediction
+from app_components.pipeline import run_pipeline
 
-
-# -------------------- PAGE SETTINGS --------------------
 
 st.set_page_config(
-    page_title="Deepfake Detection | AI Research Lab",
+    page_title="Deepfake Audio-Video Detection",
     page_icon="🎬",
     layout="wide",
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-CHECKPOINT_DIR = BASE_DIR / "checkpoints"
 
-checkpoint_files = [
-    file
-    for file in CHECKPOINT_DIR.rglob("*")
-    if file.is_file()
-    and file.suffix.lower() in {".pt", ".pth", ".ckpt"}
-    and file.stat().st_size > 0
-] if CHECKPOINT_DIR.exists() else []
+SUPPORTED_TYPES = ["mp4", "mov", "avi", "mkv", "webm"]
+MAX_FILE_SIZE = 200 * 1024 * 1024  # 200 MB
 
 
-# -------------------- CUSTOM DESIGN --------------------
+def display_prediction(result):
+    """Display prediction, confidence, and window-wise evidence."""
 
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background: #f4f7fb;
-        color: #182230;
-    }
+    if not isinstance(result, dict):
+        st.error("The inference pipeline returned an unexpected result.")
+        st.write(result)
+        return
 
-    [data-testid="stSidebar"] {
-        background: #ffffff;
-        border-right: 1px solid #d9e1ed;
-    }
+    prediction = (
+        result.get("prediction")
+        or result.get("label")
+        or result.get("class_name")
+        or result.get("final_prediction")
+    )
 
-    .block-container {
-        max-width: 1120px;
-        padding-top: 1.5rem;
-    }
+    confidence = (
+        result.get("confidence")
+        or result.get("final_confidence")
+        or result.get("prediction_confidence")
+    )
 
-    .hero {
-        background: linear-gradient(120deg, #ffffff, #eaf1ff);
-        border: 1px solid #d8e4ff;
-        border-radius: 18px;
-        padding: 28px;
-        margin-bottom: 22px;
-    }
+    evidence = (
+        result.get("window_evidence")
+        or result.get("window_results")
+        or result.get("windows")
+        or result.get("evidence")
+    )
 
-    .eyebrow {
-        color: #2457d6;
-        font-size: 12px;
-        font-weight: bold;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-    }
+    if prediction is not None:
+        label = str(prediction).strip()
+        normalized_label = label.lower()
 
-    .hero-title {
-        color: #182230;
-        font-size: 32px;
-        font-weight: 800;
-        margin-top: 8px;
-    }
-
-    .hero-copy {
-        color: #475467;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-
-    .section-title {
-        font-size: 21px;
-        font-weight: 750;
-        color: #182230;
-        margin-top: 20px;
-    }
-
-    .panel {
-        background: #ffffff;
-        border: 1px solid #dce3ee;
-        border-radius: 15px;
-        padding: 18px;
-        margin-bottom: 16px;
-    }
-
-    .stButton > button {
-        min-height: 44px;
-        border-radius: 10px;
-        font-weight: 700;
-        background: #2457d6;
-        color: white;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# -------------------- SIDEBAR --------------------
-
-with st.sidebar:
-    st.markdown("## 🎬 AI Detection Lab")
-    st.caption("Multimodal research prototype")
-    st.divider()
-
-    st.markdown("### Workspace")
-    st.markdown("📹 Video upload and preview")
-    st.markdown("🖼️ Video frame processing")
-    st.markdown("🔊 Audio feature extraction")
-    st.markdown("🧠 PyTorch model inference")
-
-    st.divider()
-    st.markdown("### Model status")
-
-    if checkpoint_files:
-        st.success("Trained checkpoint file found")
+        if "fake" in normalized_label:
+            st.error(f"Prediction: {label}")
+        elif "real" in normalized_label:
+            st.success(f"Prediction: {label}")
+        else:
+            st.info(f"Prediction: {label}")
     else:
-        st.warning("No trained checkpoint found")
+        st.warning("The result does not contain a prediction label.")
 
-    st.caption(
-        "A compatible trained checkpoint is required "
-        "to generate a prediction."
+    if confidence is not None:
+        try:
+            confidence_value = float(confidence)
+
+            # Support both 0–1 and 0–100 confidence values.
+            if 0 <= confidence_value <= 1:
+                confidence_value *= 100
+
+            st.metric("Confidence", f"{confidence_value:.2f}%")
+            st.progress(max(0.0, min(confidence_value / 100, 1.0)))
+
+        except (TypeError, ValueError):
+            st.write("Confidence:", confidence)
+
+    st.subheader("Window-wise Evidence")
+
+    if evidence is not None:
+        if isinstance(evidence, (list, tuple)):
+            if evidence:
+                st.dataframe(
+                    [
+                        item if isinstance(item, dict) else {"Evidence": item}
+                        for item in evidence
+                    ],
+                    use_container_width=True,
+                )
+            else:
+                st.info("No window-wise evidence was returned.")
+        elif isinstance(evidence, dict):
+            st.json(evidence)
+        else:
+            st.write(evidence)
+    else:
+        st.info("Window-wise evidence is not available in this result.")
+
+    with st.expander("View complete inference result"):
+        st.json(result)
+
+
+def save_uploaded_video(uploaded_file):
+    """Save an uploaded video temporarily for inference."""
+
+    suffix = Path(uploaded_file.name).suffix.lower()
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=suffix,
+    ) as temp_file:
+        temp_file.write(uploaded_file.getvalue())
+        return Path(temp_file.name)
+
+
+def main():
+    st.title("🎬 Deepfake Audio-Video Detection")
+    st.write(
+        "Upload a video to analyze it using the configured "
+        "preprocessing and trained-model inference pipeline."
     )
 
-
-# -------------------- PAGE HEADER --------------------
-
-st.markdown(
-    """
-    <div class="hero">
-        <div class="eyebrow">AI-powered media research</div>
-        <div class="hero-title">
-            Deepfake Audio-Video Detection
-        </div>
-        <p class="hero-copy">
-            Upload a video, review the preview and file information,
-            and run the connected PyTorch inference pipeline.
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
-# -------------------- OVERVIEW --------------------
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric("Input type", "Video")
-
-with col2:
-    st.metric("Maximum file size", "200 MB")
-
-with col3:
-    st.metric(
-        "Model checkpoint",
-        "Available" if checkpoint_files else "Missing",
+    st.info(
+        "Supported formats: MP4, MOV, AVI, MKV, WEBM. "
+        "Maximum upload size: 200 MB."
     )
 
+    uploaded_file = st.file_uploader(
+        "Choose a video file",
+        type=SUPPORTED_TYPES,
+        accept_multiple_files=False,
+    )
 
-# -------------------- VIDEO UPLOAD --------------------
+    if uploaded_file is None:
+        st.caption("Upload a video to begin.")
+        return
 
-st.markdown(
-    '<div class="section-title">01 · Upload video</div>',
-    unsafe_allow_html=True,
-)
+    file_size = uploaded_file.size
+    file_size_mb = file_size / (1024 * 1024)
 
-st.caption(
-    "Supported formats: MP4, MOV, AVI, MKV and WEBM."
-)
+    col1, col2 = st.columns(2)
 
-uploaded_file = st.file_uploader(
-    "Choose a video file",
-    type=["mp4", "mov", "avi", "mkv", "webm"],
-    help="Maximum allowed file size is 200 MB.",
-)
+    with col1:
+        st.write("**File name:**", uploaded_file.name)
 
+    with col2:
+        st.write("**File size:**", f"{file_size_mb:.2f} MB")
 
-# -------------------- VALIDATION AND PREVIEW --------------------
+    if file_size > MAX_FILE_SIZE:
+        st.error("The uploaded file exceeds the 200 MB limit.")
+        return
 
-if uploaded_file is None:
-    st.info("Upload a video to view its details and preview.")
-
-else:
-    is_valid, message = validate_uploaded_file(uploaded_file)
+    # Validate the uploaded file before processing.
+    is_valid, validation_message = validate_uploaded_file(uploaded_file)
 
     if not is_valid:
-        st.error(message)
+        st.error(validation_message)
+        return
 
-    else:
-        st.success("Video uploaded and validated successfully.")
+    st.success(validation_message)
 
-        file_size_mb = uploaded_file.size / (1024 * 1024)
-        file_format = Path(uploaded_file.name).suffix.upper().lstrip(".")
+    if not st.button(
+        "Analyze Video",
+        type="primary",
+        use_container_width=True,
+    ):
+        return
 
-        st.markdown(
-            '<div class="section-title">02 · Video preview</div>',
-            unsafe_allow_html=True,
+    temp_video_path = None
+
+    try:
+        with st.status(
+            "Processing video...",
+            expanded=True,
+        ) as status:
+            st.write("Saving uploaded video...")
+            temp_video_path = save_uploaded_video(uploaded_file)
+
+            st.write("Running preprocessing and model inference...")
+            raw_prediction = run_pipeline(str(temp_video_path))
+
+            status.update(
+                label="Video analysis completed.",
+                state="complete",
+                expanded=False,
+            )
+
+        st.subheader("Detection Results")
+        display_prediction(raw_prediction)
+
+    except FileNotFoundError as exc:
+        st.error(
+            "A required video file or model checkpoint was not found."
         )
+        st.caption(str(exc))
 
-        st.video(uploaded_file)
+    except ValueError as exc:
+        st.error("The video could not be processed.")
+        st.caption(str(exc))
 
-        st.markdown("#### File information")
+    except Exception as exc:
+        st.error("Video processing failed.")
+        st.caption(f"Error details: {exc}")
 
-        info1, info2, info3 = st.columns(3)
-
-        with info1:
-            st.metric("File size", f"{file_size_mb:.2f} MB")
-
-        with info2:
-            st.metric("Format", file_format)
-
-        with info3:
-            st.metric("Validation", "Passed")
-
-
-        # -------------------- MODEL STATUS --------------------
-
-        st.markdown(
-            '<div class="section-title">03 · Detection</div>',
-            unsafe_allow_html=True,
-        )
-
-        if not checkpoint_files:
-            st.warning(
-                "No trained checkpoint was found. Upload and preview "
-                "are available, but a Real/Fake prediction cannot be "
-                "generated until a compatible trained checkpoint is added."
-            )
-
-        else:
-            st.info(
-                "A checkpoint was found. Its compatibility will be "
-                "checked during inference."
-            )
-
-
-        # -------------------- VIDEO ANALYSIS --------------------
-
-        if st.button(
-            "Run video analysis",
-            type="primary",
-            use_container_width=True,
-        ):
-
-            status_box = st.status(
-                "Starting video analysis...",
-                expanded=True,
-            )
-
-            temp_video_path = None
-
+    finally:
+        if temp_video_path is not None:
             try:
-                status_box.write("Preparing uploaded video...")
-
-                extension = Path(uploaded_file.name).suffix.lower()
-
-                with tempfile.NamedTemporaryFile(
-                    suffix=extension,
-                    delete=False,
-                ) as temp_video:
-
-                    temp_video.write(uploaded_file.getvalue())
-                    temp_video_path = Path(temp_video.name)
-
-                status_box.update(
-                    label="Processing video and audio...",
-                    state="running",
-                )
-
-                status_box.write(
-                    "Extracting video frames and audio features, "
-                    "then running PyTorch inference."
-                )
-
-                raw_prediction = analyze_video(temp_video_path)
-
-                prediction = format_prediction(raw_prediction)
-
-                status_box.update(
-                    label="Analysis completed successfully.",
-                    state="complete",
-                )
+                temp_video_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
-                # -------------------- PREDICTION RESULT --------------------
-
-                st.markdown("#### Prediction result")
-
-                result_col, confidence_col = st.columns(2)
-
-                with result_col:
-                    if prediction["label"] == "Fake":
-                        st.error("Prediction: Fake")
-                    else:
-                        st.success("Prediction: Real")
-
-                with confidence_col:
-                    st.metric(
-                        "Confidence",
-                        f'{prediction["confidence"] * 100:.2f}%',
-                    )
-
-
-                # -------------------- WINDOW-WISE EVIDENCE --------------------
-
-                evidence = prediction["window_evidence"]
-
-                if evidence:
-                    st.markdown("#### Window-wise evidence")
-
-                    st.dataframe(
-                        evidence,
-                        use_container_width=True,
-                        hide_index=True,
-                    )
-
-                else:
-                    st.info(
-                        "The model did not return window-wise evidence."
-                    )
-
-                st.caption(
-                    "Inference device: "
-                    + str(raw_prediction.get("device", "Unknown"))
-                )
-
-
-            # -------------------- ERROR HANDLING --------------------
-
-            except Exception as exc:
-                status_box.update(
-                    label="Video analysis failed.",
-                    state="error",
-                )
-
-                st.error(f"Analysis failed: {exc}")
-
-                st.info(
-                    "No prediction was generated. Check the trained "
-                    "checkpoint, preprocessing steps and model inference."
-                )
-
-
-            # -------------------- TEMPORARY FILE CLEANUP --------------------
-
-            finally:
-                if temp_video_path is not None:
-                    try:
-                        temp_video_path.unlink(missing_ok=True)
-                    except OSError:
-                        pass
-
-
-# -------------------- FOOTER --------------------
-
-st.divider()
-
-st.caption(
-    "AI Detection Lab · Research Prototype · "
-    "Predictions require a compatible trained checkpoint."
-)
+if __name__ == "__main__":
+    main()

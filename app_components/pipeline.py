@@ -1,35 +1,78 @@
 
+"""Video preprocessing and inference pipeline."""
+
 from pathlib import Path
-from typing import Callable, Any
+
+from app_components.inference import analyze_video
 
 
 def run_pipeline(
-    video_path: str | Path,
-    preprocess_fn: Callable[[str], Any],
-    inference_fn: Callable[[Any], Any],
-) -> Any:
-    """
-    Run video preprocessing followed by model inference.
+    video_path,
+    preprocess_fn=None,
+    inference_fn=None,
+    checkpoint_path=None,
+):
+    """Validate a video, preprocess it, and run inference.
 
-    The preprocessing and inference functions are supplied by
-    the caller so this pipeline can connect to the project's
-    existing preprocessing code and trained model.
+    Optional preprocessing and inference functions allow the pipeline
+    to be tested without loading a trained model.
     """
+
     path = Path(video_path)
 
+    # Check that the video path exists.
     if not path.exists():
         raise FileNotFoundError(f"Video file not found: {path}")
 
+    # Check that the path points to a file.
     if not path.is_file():
-        raise ValueError("The video path must point to a file.")
+        raise ValueError(f"Video path is not a file: {path}")
 
-    if not callable(preprocess_fn):
-        raise TypeError("preprocess_fn must be callable.")
+    # Reject empty video files.
+    if path.stat().st_size == 0:
+        raise ValueError("The video file is empty.")
 
-    if not callable(inference_fn):
-        raise TypeError("inference_fn must be callable.")
+    # Test mode: use the supplied preprocessing and inference functions.
+    if preprocess_fn is not None or inference_fn is not None:
+        if preprocess_fn is None:
+            raise TypeError(
+                "preprocess_fn must be a callable function."
+            )
 
-    preprocessed_data = preprocess_fn(str(path))
-    prediction = inference_fn(preprocessed_data)
+        if inference_fn is None:
+            raise TypeError(
+                "inference_fn must be a callable function."
+            )
 
-    return prediction
+        if not callable(preprocess_fn):
+            raise TypeError(
+                "preprocess_fn must be a callable function."
+            )
+
+        if not callable(inference_fn):
+            raise TypeError(
+                "inference_fn must be a callable function."
+            )
+
+        processed_data = preprocess_fn(str(path))
+        result = inference_fn(processed_data)
+
+        return result
+
+    # Production mode: run the actual trained-model inference pipeline.
+    if checkpoint_path is None:
+        return analyze_video(str(path))
+
+    return analyze_video(
+        str(path),
+        checkpoint_path=checkpoint_path,
+    )
+
+
+def run_video_pipeline(video_path, checkpoint_path=None):
+    """Backward-compatible entry point for the Streamlit app."""
+
+    return run_pipeline(
+        video_path,
+        checkpoint_path=checkpoint_path,
+    )
