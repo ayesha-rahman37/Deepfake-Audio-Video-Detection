@@ -5,6 +5,7 @@ project:
 
 data:
   window_duration: 5
+  window_overlap: 0
   frames_per_window: 16
   image_size: 224
   sample_rate: 16000
