@@ -136,3 +136,32 @@ Development takes place in feature branches. Changes are submitted through pull 
 ## Project Status
 
 Environment setup and baseline implementation are in progress. Model training and controlled evaluation are pending.
+
+## Full-frame video preprocessing
+
+`preprocessing.video_reader.VideoReader` decodes frames sequentially and yields
+RGB images with the original stream index and timestamp provenance. OpenCV's
+decoder-position timestamps are used when they advance reliably and are
+normalized to the first frame; OpenCV does not guarantee these are exact source
+presentation timestamps for every backend. Otherwise the reader explicitly
+estimates timestamps from reported FPS. That fallback assumes a constant
+frame rate and is not exact for variable-frame-rate video.
+The reader's `metadata` is finalized after its iterator is exhausted and
+contains the decoded duration estimate, reported metadata, and warnings.
+
+`preprocessing.temporal_segmenter.segment_video(duration)` covers the video
+using half-open `[start, end)` intervals, with five-second windows and no
+overlap by default. `preprocessing.frame_sampler.sample_video(path)` makes a
+metadata pass followed by a sequential sampling pass, choosing the nearest
+decoded full frame to each of 16 evenly spaced bin-center timestamps per
+window. It returns sampled RGB images plus timestamps, source frame indices,
+segment boundaries, and warnings. If multiple targets resolve to one source
+frame, that frame is returned once rather than duplicated.
+
+The `VisualEncoder` accepts ImageNet-normalized RGB tensors with shape
+`[batch, 3, height, width]` and returns `[batch, 2048]` ResNet50 features.
+`preprocess_rgb` accepts unnormalized RGB tensors in `[0, 1]`, resizes the
+whole frame to 224x224 by default (without cropping), and applies ImageNet
+normalization. `TemporalModel` accepts ordered features shaped
+`[batch, sequence, feature_dim]` and returns a pooled temporal representation;
+optional sequence lengths exclude padded frames.
