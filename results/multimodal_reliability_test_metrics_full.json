@@ -1,0 +1,31 @@
+{
+  "split": "test",
+  "fusion_mode": "reliability",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
+  "checkpoint_epoch": 2,
+  "samples": 56472,
+  "parts": 56,
+  "class_counts": {
+    "real": 34107,
+    "fake": 22365
+  },
+  "loss_unweighted": 0.656172049634622,
+  "accuracy": 0.6824089814421306,
+  "balanced_accuracy": 0.727987732692025,
+  "precision_fake": 0.5583847329853973,
+  "recall_fake": 0.9471942767717415,
+  "f1_fake": 0.7025852776810441,
+  "macro_f1": 0.6809406318497734,
+  "roc_auc": 0.7913670187123202,
+  "confusion_matrix_labels_0_1": [
+    [
+      17353,
+      16754
+    ],
+    [
+      1181,
+      21184
+    ]
+  ],
+  "note": "Full fixed test split; predictions combined from saved non-overlapping chunks."
+}

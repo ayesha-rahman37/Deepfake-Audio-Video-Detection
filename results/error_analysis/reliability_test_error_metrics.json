@@ -1,0 +1,28 @@
+{
+    "split": "test",
+    "fusion_mode": "reliability",
+    "samples": 56472,
+    "threshold": 0.5,
+    "confusion_matrix_labels_0_1": [
+        [
+            17353,
+            16754
+        ],
+        [
+            1181,
+            21184
+        ]
+    ],
+    "accuracy": 0.6824089814421306,
+    "balanced_accuracy": 0.727987732692025,
+    "class_0_precision": 0.9362792705298371,
+    "class_0_recall": 0.5087811886123084,
+    "class_0_f1": 0.6592959860185027,
+    "class_1_precision": 0.5583847329853973,
+    "class_1_recall": 0.9471942767717415,
+    "class_1_f1": 0.7025852776810441,
+    "macro_f1": 0.6809406318497734,
+    "false_positives": 16754,
+    "false_negatives": 1181,
+    "misclassified_samples": 17935
+}
