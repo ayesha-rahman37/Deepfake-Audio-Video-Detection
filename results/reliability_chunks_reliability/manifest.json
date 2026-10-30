@@ -1,0 +1,9 @@
+{
+    "checkpoint":  "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
+    "checkpoint_size":  122727229,
+    "checkpoint_mtime":  1793043744.5276847,
+    "fusion_mode":  "reliability",
+    "dataset_samples":  56472,
+    "parts":  56,
+    "seed":  123
+}
