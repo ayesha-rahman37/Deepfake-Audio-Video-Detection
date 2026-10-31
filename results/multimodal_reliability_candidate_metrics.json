@@ -1,0 +1,172 @@
+{
+  "warning": "Pilot results are not final held-out test performance.",
+  "device": "cuda",
+  "gpu_name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+  "fusion_mode": "reliability",
+  "args": {
+    "max_train_samples": 512,
+    "max_val_samples": 128,
+    "epochs": 3,
+    "batch_size": 1,
+    "learning_rate": 0.0001,
+    "seed": 42,
+    "patience": 3,
+    "fusion_mode": "reliability",
+    "no_pretrained_visual": false
+  },
+  "class_counts": {
+    "train": {
+      "real": 256,
+      "fake": 256
+    },
+    "validation": {
+      "real": 64,
+      "fake": 64
+    }
+  },
+  "best_epoch": 1,
+  "best_validation_loss": 0.6988095522392541,
+  "history": [
+    {
+      "epoch": 1,
+      "learning_rate": 0.0001,
+      "train": {
+        "loss": 0.6897920249029994,
+        "accuracy": 0.560546875,
+        "balanced_accuracy": 0.560546875,
+        "precision_fake": 0.5654008438818565,
+        "recall_fake": 0.5234375,
+        "f1_fake": 0.5436105476673428,
+        "macro_f1": 0.5599408670540105,
+        "roc_auc": 0.5855255126953125,
+        "samples": 512,
+        "confusion_matrix_labels_0_1": [
+          [
+            153,
+            103
+          ],
+          [
+            122,
+            134
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 0.6988095522392541,
+        "accuracy": 0.5,
+        "balanced_accuracy": 0.5,
+        "precision_fake": 0.5,
+        "recall_fake": 1.0,
+        "f1_fake": 0.6666666666666666,
+        "macro_f1": 0.3333333333333333,
+        "roc_auc": 0.701416015625,
+        "samples": 128,
+        "confusion_matrix_labels_0_1": [
+          [
+            0,
+            64
+          ],
+          [
+            0,
+            64
+          ]
+        ]
+      },
+      "epoch_seconds": 226.19
+    },
+    {
+      "epoch": 2,
+      "learning_rate": 0.0001,
+      "train": {
+        "loss": 0.6615450562076148,
+        "accuracy": 0.6640625,
+        "balanced_accuracy": 0.6640625,
+        "precision_fake": 0.6228070175438597,
+        "recall_fake": 0.83203125,
+        "f1_fake": 0.7123745819397993,
+        "macro_f1": 0.6543093566975992,
+        "roc_auc": 0.70465087890625,
+        "samples": 512,
+        "confusion_matrix_labels_0_1": [
+          [
+            127,
+            129
+          ],
+          [
+            43,
+            213
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 1.2461346589261666,
+        "accuracy": 0.421875,
+        "balanced_accuracy": 0.421875,
+        "precision_fake": 0.4576271186440678,
+        "recall_fake": 0.84375,
+        "f1_fake": 0.5934065934065934,
+        "macro_f1": 0.2967032967032967,
+        "roc_auc": 0.205078125,
+        "samples": 128,
+        "confusion_matrix_labels_0_1": [
+          [
+            0,
+            64
+          ],
+          [
+            10,
+            54
+          ]
+        ]
+      },
+      "epoch_seconds": 245.35
+    },
+    {
+      "epoch": 3,
+      "learning_rate": 5e-05,
+      "train": {
+        "loss": 0.5904326742137584,
+        "accuracy": 0.767578125,
+        "balanced_accuracy": 0.767578125,
+        "precision_fake": 0.7290969899665551,
+        "recall_fake": 0.8515625,
+        "f1_fake": 0.7855855855855856,
+        "macro_f1": 0.7659271211510017,
+        "roc_auc": 0.8687744140625,
+        "samples": 512,
+        "confusion_matrix_labels_0_1": [
+          [
+            175,
+            81
+          ],
+          [
+            38,
+            218
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 1.8906334398925537,
+        "accuracy": 0.25,
+        "balanced_accuracy": 0.25,
+        "precision_fake": 0.32978723404255317,
+        "recall_fake": 0.484375,
+        "f1_fake": 0.3924050632911392,
+        "macro_f1": 0.20640661327822268,
+        "roc_auc": 0.108642578125,
+        "samples": 128,
+        "confusion_matrix_labels_0_1": [
+          [
+            1,
+            63
+          ],
+          [
+            33,
+            31
+          ]
+        ]
+      },
+      "epoch_seconds": 247.41
+    }
+  ]
+}

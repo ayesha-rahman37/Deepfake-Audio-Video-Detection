@@ -1,31 +1,43 @@
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
-# Virtual environment
+# Virtual environments
 .venv/
 venv/
 
-# IDE and local settings
+# IDE
 .vscode/
-.env
+.idea/
 
-# Dataset files: do not upload raw videos/audio to GitHub
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dataset files
 data/raw/*
 !data/raw/.gitkeep
-
 data/processed/*
 !data/processed/.gitkeep
 
-# Model checkpoints may be large
+# Model checkpoints
 checkpoints/*
 !checkpoints/.gitkeep
+*.pt
+*.pth
 
-# Generated training runs
+# Evaluation chunks and generated outputs
+results/reliability_chunks_reliability/
 results/runs/
+
+# Local validation reports
+reports/
 
 # Logs
 *.log
 
-# Test cache
-.pytest_cache/
+# OS files
+.DS_Store
+Thumbs.db
