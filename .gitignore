@@ -57,3 +57,16 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+
+# Processed media and dataset metadata
+data/processed/
+data/metadata/lavdf_metadata.csv
+data/*.lnk
+*.npy
+*.jpg
+*.jpeg
+
+# Generated evaluation chunks
+results/reliability_chunks_reliability/
+results/reliability_chunks_dev_reliability/
