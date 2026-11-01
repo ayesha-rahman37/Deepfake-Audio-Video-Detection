@@ -32,6 +32,15 @@ ROOT = PROJECT_ROOT
 CONFIG_PATH = ROOT / "configs" / "config.yaml"
 CHECKPOINT_PATH = ROOT / "checkpoints" / "multimodal_reliability_best.pt"
 THRESHOLD = 0.5
+UNCERTAINTY_MARGIN = 0.10
+
+def classify_score(probability_fake):
+    """Return a cautious label; scores near 0.5 remain inconclusive."""
+    if probability_fake >= THRESHOLD + UNCERTAINTY_MARGIN:
+        return "FAKE"
+    if probability_fake <= THRESHOLD - UNCERTAINTY_MARGIN:
+        return "REAL"
+    return "INCONCLUSIVE"
 
 
 # --------------------------------------------------
@@ -172,6 +181,48 @@ def load_model(device):
 # 4. EXTRACT VIDEO FRAMES AND AUDIO FEATURES
 # --------------------------------------------------
 
+def _read_frame_with_ffmpeg(video_path, timestamp, ffmpeg, max_retries=8, step_seconds=0.12):
+    """Decode a frame with FFmpeg, retrying earlier timestamps near EOF."""
+    video_path = str(video_path)
+
+    for attempt in range(max_retries + 1):
+        seek_time = max(0.0, float(timestamp) - attempt * step_seconds)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            frame_path = Path(temp_dir) / "frame.jpg"
+
+            # Place -ss after -i for accurate seeking. This is slower than
+            # input seeking but more reliable for short/mobile MP4 recordings.
+            command = [
+                ffmpeg,
+                "-y",
+                "-v", "error",
+                "-i", video_path,
+                "-ss", f"{seek_time:.6f}",
+                "-frames:v", "1",
+                "-q:v", "2",
+                str(frame_path),
+            ]
+
+            try:
+                result = subprocess.run(
+                    command,
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                    check=False,
+                )
+            except subprocess.TimeoutExpired:
+                continue
+
+            if result.returncode == 0 and frame_path.is_file():
+                frame = cv2.imread(str(frame_path))
+                if frame is not None and frame.size > 0:
+                    return frame, seek_time
+
+    return None, None
+
+
 def extract_window(
     video_path,
     start,
@@ -180,113 +231,85 @@ def extract_window(
     transform,
     ffmpeg,
 ):
-
+    """Extract a fixed number of valid frames and aligned audio for one window."""
     cap = cv2.VideoCapture(str(video_path))
 
     try:
-
         if not cap.isOpened():
-            raise RuntimeError(
-                "Could not open uploaded video."
-            )
+            raise RuntimeError("Could not open uploaded video.")
 
         fps = cap.get(cv2.CAP_PROP_FPS)
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-        total_frames = int(
-            cap.get(cv2.CAP_PROP_FRAME_COUNT)
-        )
+        if not np.isfinite(fps) or fps <= 0 or total_frames < 2:
+            raise RuntimeError("Video FPS or frame count is invalid.")
 
-        if (
-            not np.isfinite(fps)
-            or fps <= 0
-            or total_frames <= 0
-        ):
-            raise RuntimeError(
-                "Video FPS or frame count is invalid."
-            )
-
-        duration = total_frames / fps
-
+        # Use the last frame before the container's reported end. This avoids
+        # seeking to an MP4 timestamp that exists in metadata but has no frame.
+        last_decodable_time = max(0.0, (total_frames - 2) / fps)
         start = max(0.0, float(start))
-        end = min(float(end), duration)
+        end = min(float(end), last_decodable_time + 1.0 / fps)
 
         if end <= start:
-            raise RuntimeError(
-                "Invalid video window."
-            )
+            raise RuntimeError("Invalid video window after duration adjustment.")
 
-        last_valid_time = max(
-            start,
-            end - 1.0 / fps,
-        )
-
-        timestamps = np.linspace(
-            start,
-            last_valid_time,
-            int(settings["frames_per_window"]),
-        )
-
+        last_sample_time = min(last_decodable_time, max(start, end - 1.0 / fps))
+        frame_count = int(settings["frames_per_window"])
+        timestamps = np.linspace(start, last_sample_time, frame_count)
         frames = []
 
         for timestamp in timestamps:
+            # Clamp every request to a frame index that should exist.
+            frame_index = int(round(float(timestamp) * fps))
+            frame_index = min(max(frame_index, 0), total_frames - 2)
+            frame = None
 
-            frame_index = min(
-                max(int(timestamp * fps), 0),
-                total_frames - 1,
-            )
+            # First try OpenCV. Retry nearby earlier frames because some
+            # variable-frame-rate/mobile MP4s fail on direct end-of-file seeks.
+            for offset in range(0, min(31, total_frames - 1)):
+                candidate_index = max(0, frame_index - offset)
+                cap.set(cv2.CAP_PROP_POS_FRAMES, candidate_index)
+                ok, candidate = cap.read()
+                if ok and candidate is not None and candidate.size > 0:
+                    frame = candidate
+                    break
 
-            cap.set(
-                cv2.CAP_PROP_POS_FRAMES,
-                frame_index,
-            )
-
-            success, frame = cap.read()
-
-            if not success or frame is None:
-                raise RuntimeError(
-                    f"Could not decode video frame "
-                    f"at {timestamp:.2f}s."
+            # FFmpeg fallback: accurate seeking and multiple earlier retries.
+            if frame is None:
+                frame, _ = _read_frame_with_ffmpeg(
+                    video_path,
+                    min(float(timestamp), last_decodable_time),
+                    ffmpeg,
                 )
 
-            rgb = cv2.cvtColor(
-                frame,
-                cv2.COLOR_BGR2RGB,
-            )
+            if frame is None:
+                raise RuntimeError(
+                    f"Could not decode a video frame near {timestamp:.2f}s "
+                    "even after OpenCV and FFmpeg retries. "
+                    "The uploaded file may be damaged or use an unsupported codec."
+                )
 
-            image = Image.fromarray(rgb)
-
-            frames.append(
-                transform(image)
-            )
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frames.append(transform(Image.fromarray(rgb)))
 
         video_tensor = torch.stack(frames)
 
     finally:
         cap.release()
 
-    # ----------------------------------------------
-    # AUDIO EXTRACTION
-    # ----------------------------------------------
-
-    sample_rate = int(
-        settings["audio_sample_rate"]
-    )
-
-    target_samples = round(
-        float(settings["window_duration"]) * sample_rate
-    )
+    # AUDIO EXTRACTION: retain the original window start/end for A/V alignment.
+    sample_rate = int(settings["audio_sample_rate"])
+    target_samples = round(float(settings["window_duration"]) * sample_rate)
 
     with tempfile.TemporaryDirectory() as temp_dir:
-
         wav_path = Path(temp_dir) / "audio.wav"
-
         command = [
             ffmpeg,
             "-y",
             "-v", "error",
             "-ss", f"{start:.6f}",
             "-i", str(video_path),
-            "-t", f"{end - start:.6f}",
+            "-t", f"{max(0.01, end - start):.6f}",
             "-map", "0:a:0",
             "-vn",
             "-ac", "1",
@@ -304,40 +327,21 @@ def extract_window(
         )
 
         if result.returncode != 0 or not wav_path.is_file():
-
             raise RuntimeError(
-                "Audio extraction failed. "
-                "Check that the video contains a readable audio stream. "
-                + (result.stderr or "")[-500:]
+                "Audio extraction failed. Check that the video contains a "
+                "readable audio stream. " + (result.stderr or "")[-500:]
             )
 
-        audio, _ = librosa.load(
-            str(wav_path),
-            sr=sample_rate,
-            mono=True,
-        )
+        audio, _ = librosa.load(str(wav_path), sr=sample_rate, mono=True)
 
     if audio.size == 0:
-        raise RuntimeError(
-            "The extracted audio is empty."
-        )
+        raise RuntimeError("The extracted audio is empty.")
 
-    # Maintain fixed-length audio input for every window.
-
+    # Fixed-length audio tensor expected by the trained model.
     if len(audio) < target_samples:
-
-        audio = np.pad(
-            audio,
-            (0, target_samples - len(audio)),
-        )
-
+        audio = np.pad(audio, (0, target_samples - len(audio)))
     else:
-
         audio = audio[:target_samples]
-
-    # ----------------------------------------------
-    # LOG-MEL SPECTROGRAM
-    # ----------------------------------------------
 
     mel = librosa.feature.melspectrogram(
         y=audio,
@@ -347,21 +351,12 @@ def extract_window(
         n_mels=64,
         power=2.0,
     )
-
-    log_mel = librosa.power_to_db(
-        mel,
-        ref=np.max,
-    ).astype(np.float32)
+    log_mel = librosa.power_to_db(mel, ref=np.max).astype(np.float32)
 
     if not np.isfinite(log_mel).all():
-        raise RuntimeError(
-            "Audio features contain invalid values."
-        )
+        raise RuntimeError("Audio features contain invalid values.")
 
-    return (
-        video_tensor,
-        torch.from_numpy(log_mel),
-    )
+    return video_tensor, torch.from_numpy(log_mel)
 
 
 # --------------------------------------------------
@@ -419,7 +414,9 @@ def predict_video(video_path):
                 "Invalid video properties."
             )
 
-        duration = frame_count / fps
+        # OpenCV's reported frame count can include an undecodable trailing
+        # frame. Use a conservative duration for window boundaries.
+        duration = max(0.0, (frame_count - 2) / fps)
 
         if not np.isfinite(duration) or duration <= 0:
             raise RuntimeError(
@@ -505,11 +502,7 @@ def predict_video(video_path):
 
         fake_score = probability_fake * 100
 
-        window_prediction = (
-            "FAKE"
-            if probability_fake >= THRESHOLD
-            else "REAL"
-        )
+        window_prediction = classify_score(probability_fake)
 
         results.append({
 
@@ -578,11 +571,7 @@ def predict_video(video_path):
 
     final_probability = average_fake_score / 100.0
 
-    final_prediction = (
-        "FAKE"
-        if final_probability >= THRESHOLD
-        else "REAL"
-    )
+    final_prediction = classify_score(final_probability)
 
     # ----------------------------------------------
     # FINAL RESULT
@@ -611,9 +600,19 @@ def predict_video(video_path):
 
         "windows": results,
 
+        "decision_thresholds": {
+            "likely_real_max_fake_score": round((THRESHOLD - UNCERTAINTY_MARGIN) * 100, 2),
+            "inconclusive_range": [
+                round((THRESHOLD - UNCERTAINTY_MARGIN) * 100, 2),
+                round((THRESHOLD + UNCERTAINTY_MARGIN) * 100, 2),
+            ],
+            "likely_fake_min_fake_score": round((THRESHOLD + UNCERTAINTY_MARGIN) * 100, 2),
+        },
         "warning": (
-            "Research prototype: scores are model outputs, "
-            "not calibrated probabilities or proof of authenticity."
+            "Research prototype: scores are model outputs, not calibrated "
+            "probabilities or proof of authenticity. INCONCLUSIVE means the "
+            "score is near the decision boundary. A REAL recording can be "
+            "incorrectly flagged as FAKE; verify results independently."
         ),
 
     }

@@ -1,52 +1,59 @@
-# Python
+
+# Python cache
 __pycache__/
 *.py[cod]
-.pytest_cache/
+*$py.class
 
-# Virtual environments
-.venv/
+# Virtual environment
 venv/
+.venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+
+# Model checkpoints and weights
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+
+# Dataset files
+datasets/LAV-DF/
+data/LAV-DF/
+data/dataset/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wav
+*.mp3
+
+# Generated temporary results
+results/reliability_chunks_dev_reliability/
+results/reliability_chunks_reliability/
+results/repaired_real_video.mp4
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # IDE
 .vscode/
 .idea/
 
-# Environment and secrets
-.env
-.env.*
-!.env.example
-
-# Dataset files
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-
-# Model checkpoints
-checkpoints/*
-!checkpoints/.gitkeep
-*.pt
-*.pth
-
-# Evaluation chunks and generated outputs
-results/reliability_chunks_reliability/
-results/runs/
-
-# Local validation reports
-reports/
-
-# Logs
-*.log
-
 # OS files
 .DS_Store
 Thumbs.db
-
-
-# Local database files
-*.db
-*.sqlite3
-
-# Generated evaluation chunks
-results/reliability_chunks_dev_reliability/
-results/reliability_chunks_reliability/
+desktop.ini

@@ -1,0 +1,189 @@
+{
+  "split": "dev",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
+  "checkpoint_size_mb": 117.0418062210083,
+  "device": "cuda",
+  "fusion_mode": "reliability",
+  "threshold": 0.5,
+  "sample_count": 128,
+  "seed": 321,
+  "note": "Tensor-level degradation simulations, not real codec re-encoding.",
+  "results": {
+    "baseline": {
+      "accuracy": 0.6484375,
+      "balanced_accuracy": 0.7104166666666667,
+      "precision_fake": 0.5168539325842697,
+      "recall_fake": 0.9583333333333334,
+      "f1_fake": 0.6715328467153284,
+      "macro_f1": 0.6466907931055634,
+      "roc_auc": 0.796875,
+      "confusion_matrix": [
+        [
+          37,
+          43
+        ],
+        [
+          2,
+          46
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 10.345128899989504,
+      "mean_inference_ms_per_sample": 80.821319531168
+    },
+    "low_resolution": {
+      "accuracy": 0.6484375,
+      "balanced_accuracy": 0.7104166666666667,
+      "precision_fake": 0.5168539325842697,
+      "recall_fake": 0.9583333333333334,
+      "f1_fake": 0.6715328467153284,
+      "macro_f1": 0.6466907931055634,
+      "roc_auc": 0.796875,
+      "confusion_matrix": [
+        [
+          37,
+          43
+        ],
+        [
+          2,
+          46
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 9.656685099966126,
+      "mean_inference_ms_per_sample": 75.44285234348536
+    },
+    "blur": {
+      "accuracy": 0.6484375,
+      "balanced_accuracy": 0.7104166666666667,
+      "precision_fake": 0.5168539325842697,
+      "recall_fake": 0.9583333333333334,
+      "f1_fake": 0.6715328467153284,
+      "macro_f1": 0.6466907931055634,
+      "roc_auc": 0.7966145833333333,
+      "confusion_matrix": [
+        [
+          37,
+          43
+        ],
+        [
+          2,
+          46
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 9.71537320002244,
+      "mean_inference_ms_per_sample": 75.90135312517532
+    },
+    "frame_drop": {
+      "accuracy": 0.6484375,
+      "balanced_accuracy": 0.7104166666666667,
+      "precision_fake": 0.5168539325842697,
+      "recall_fake": 0.9583333333333334,
+      "f1_fake": 0.6715328467153284,
+      "macro_f1": 0.6466907931055634,
+      "roc_auc": 0.796875,
+      "confusion_matrix": [
+        [
+          37,
+          43
+        ],
+        [
+          2,
+          46
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 9.786665600011474,
+      "mean_inference_ms_per_sample": 76.45832500008964
+    },
+    "audio_noise": {
+      "accuracy": 0.421875,
+      "balanced_accuracy": 0.5333333333333333,
+      "precision_fake": 0.39166666666666666,
+      "recall_fake": 0.9791666666666666,
+      "f1_fake": 0.5595238095238095,
+      "macro_f1": 0.3593073593073593,
+      "roc_auc": 0.6421874999999999,
+      "confusion_matrix": [
+        [
+          7,
+          73
+        ],
+        [
+          1,
+          47
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 10.587622899980488,
+      "mean_inference_ms_per_sample": 82.71580390609756
+    },
+    "audio_quantization": {
+      "accuracy": 0.640625,
+      "balanced_accuracy": 0.7083333333333333,
+      "precision_fake": 0.5108695652173914,
+      "recall_fake": 0.9791666666666666,
+      "f1_fake": 0.6714285714285714,
+      "macro_f1": 0.6374384236453201,
+      "roc_auc": 0.7927083333333333,
+      "confusion_matrix": [
+        [
+          35,
+          45
+        ],
+        [
+          1,
+          47
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 11.096186299982946,
+      "mean_inference_ms_per_sample": 86.68895546861677
+    },
+    "av_shift": {
+      "accuracy": 0.46875,
+      "balanced_accuracy": 0.575,
+      "precision_fake": 0.41379310344827586,
+      "recall_fake": 1.0,
+      "f1_fake": 0.5853658536585366,
+      "macro_f1": 0.4231177094379639,
+      "roc_auc": 0.7278645833333334,
+      "confusion_matrix": [
+        [
+          12,
+          68
+        ],
+        [
+          0,
+          48
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 11.344811599967215,
+      "mean_inference_ms_per_sample": 88.63134062474387
+    },
+    "combined": {
+      "accuracy": 0.40625,
+      "balanced_accuracy": 0.525,
+      "precision_fake": 0.3870967741935484,
+      "recall_fake": 1.0,
+      "f1_fake": 0.5581395348837209,
+      "macro_f1": 0.3266888150609081,
+      "roc_auc": 0.5223958333333334,
+      "confusion_matrix": [
+        [
+          4,
+          76
+        ],
+        [
+          0,
+          48
+        ]
+      ],
+      "samples": 128,
+      "total_inference_seconds": 11.208637000032468,
+      "mean_inference_ms_per_sample": 87.56747656275365
+    }
+  }
+}
