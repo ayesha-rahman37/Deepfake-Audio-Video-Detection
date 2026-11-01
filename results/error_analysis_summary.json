@@ -1,0 +1,21 @@
+{
+  "source_file": "reliability_mapped_errors.csv",
+  "scope": "Error-only records from the full-test reliability model; this file contains misclassified windows, not all test predictions.",
+  "misclassified_windows": 17935,
+  "false_positives": 16754,
+  "false_negatives": 1181,
+  "unique_videos_with_errors": 13094,
+  "false_positive_unique_videos": 12213,
+  "false_negative_unique_videos": 1082,
+  "false_positive_fake_score_mean": 0.564364,
+  "false_positive_fake_score_median": 0.558613,
+  "false_negative_fake_score_mean": 0.479185,
+  "false_negative_fake_score_median": 0.485169,
+  "interpretation": [
+    "False positives substantially outnumber false negatives in this error-only file.",
+    "False-positive windows have a mean fake score around 0.564, indicating that many are not extremely high-confidence outputs.",
+    "False-negative windows have a mean fake score around 0.479, close to the 0.5 binary decision threshold.",
+    "This file does not contain correctly classified windows, so it cannot independently reproduce accuracy, precision, recall, F1, or ROC-AUC.",
+    "Repeated windows from the same source video are not independent observations."
+  ]
+}

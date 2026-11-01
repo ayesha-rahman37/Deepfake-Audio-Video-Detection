@@ -1,0 +1,65 @@
+{
+  "experiment": "temporal_order_ablation",
+  "split": "test",
+  "fusion_mode": "reliability",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
+  "checkpoint_epoch": 2,
+  "seed": 321,
+  "sample_count": 256,
+  "class_counts": {
+    "real": 128,
+    "fake": 128
+  },
+  "threshold": 0.5,
+  "protocol": "Same windows and labels; compare original 16-frame sequence with the exact reversed sequence; audio is unchanged. No retraining.",
+  "normal_order": {
+    "samples": 256,
+    "threshold": 0.5,
+    "accuracy": 0.73046875,
+    "balanced_accuracy": 0.73046875,
+    "precision_fake": 0.6612021857923497,
+    "recall_fake": 0.9453125,
+    "f1_fake": 0.7781350482315113,
+    "macro_f1": 0.7174257330709795,
+    "roc_auc": 0.8050537109375,
+    "confusion_matrix_labels_0_1": [
+      [
+        66,
+        62
+      ],
+      [
+        7,
+        121
+      ]
+    ]
+  },
+  "reversed_order": {
+    "samples": 256,
+    "threshold": 0.5,
+    "accuracy": 0.73046875,
+    "balanced_accuracy": 0.73046875,
+    "precision_fake": 0.6612021857923497,
+    "recall_fake": 0.9453125,
+    "f1_fake": 0.7781350482315113,
+    "macro_f1": 0.7174257330709795,
+    "roc_auc": 0.8050537109375,
+    "confusion_matrix_labels_0_1": [
+      [
+        66,
+        62
+      ],
+      [
+        7,
+        121
+      ]
+    ]
+  },
+  "sensitivity": {
+    "mean_absolute_fake_score_change": 8.335337042808533e-08,
+    "median_absolute_fake_score_change": 0.0,
+    "prediction_flip_count": 0,
+    "prediction_flip_rate": 0.0
+  },
+  "elapsed_seconds": 101.084,
+  "interpretation_note": "A difference indicates sensitivity to temporal order under reversal; no difference does not prove that the temporal branch is unused. This is a subset diagnostic unless sample_count equals the full split."
+}
