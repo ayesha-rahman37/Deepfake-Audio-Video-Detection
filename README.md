@@ -259,3 +259,36 @@ Use the exact split, sample count, seed, checkpoint, and configuration when repr
 ## 10. Research disclaimer
 
 This is an academic research prototype. Predictions can be wrong, and performance may change on videos from different sources, codecs, manipulation methods, or recording conditions. Always interpret results with the reported evaluation protocol and limitations.
+
+## 11. Streamlit application and decision policy
+
+The repository includes a Streamlit interface (`app.py`) with account registration/login, video upload, multimodal analysis, visual/audio evidence views, detection history, and saved detection reports. The application calls `inference/predict_video.py` and stores detection records in a local SQLite database. The database is local application data and should not be committed or shared.
+
+### Three-way output policy
+
+The current inference interface uses an uncertainty band around the 0.50 fake-score threshold:
+
+| Fake score | Displayed decision |
+|---|---|
+| 0% to 40% (inclusive) | REAL |
+| Above 40% and below 60% | INCONCLUSIVE |
+| 60% or above | FAKE |
+
+This is a conservative user-interface decision rule, not a threshold learned from a calibration set. It does not improve the underlying model or make its scores calibrated probabilities. An INCONCLUSIVE result means the model output is near the decision boundary and should not be forced into a binary conclusion.
+
+Run the application from the project root:
+
+```powershell
+python -m streamlit run app.py
+```
+
+## 12. Additional audit and reproducibility notes
+
+The dataset manifest audit is saved as `results/dataset_manifest_audit.json` when generated. Keep the audit alongside the experiment outputs so the indexed split sizes, skipped metadata/files, duration corrections, and sample-ID overlap checks can be reviewed. The audit's sample-ID overlap check is distinct from the original-video leakage audit described in Section 2.
+
+A repaired/re-encoded sample video may be used for local pipeline testing, but do not commit user-provided videos or other private media to the repository. Store local SQLite databases, temporary media, datasets, checkpoints, virtual environments, and machine-specific files outside version control.
+
+## 13. Remaining evaluation work
+
+The current experiments do not yet establish temporal-order sensitivity, calibrated confidence, cross-dataset generalization, or forensic reliability. A dedicated temporal-order ablation and a structured false-positive/false-negative review remain useful follow-up analyses. Do not claim these experiments are complete unless their result files and protocols are added to `results/` and documented here.
+

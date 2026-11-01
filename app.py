@@ -161,9 +161,12 @@ def render_result_summary(result):
     fake_score = result["fake_score"]
     real_score = result["real_score"]
 
-    prediction_color = (
-        "#d94c68" if prediction == "FAKE" else "#168768"
-    )
+    prediction_colors = {
+        "FAKE": "#d94c68",
+        "REAL": "#168768",
+        "INCONCLUSIVE": "#c58a16",
+    }
+    prediction_color = prediction_colors.get(prediction, "#777187")
 
     st.html(f"""
     <div class="feature-card" style="min-height:0;padding:27px">
@@ -181,6 +184,14 @@ def render_result_summary(result):
             &nbsp; | &nbsp;
             Real score: {real_score:.2f}%
         </div>
+        {(
+            '<div style="margin-top:14px;padding:11px 13px;border-radius:10px;'
+            'background:#fff4d9;color:#805b10;font-size:13px">'
+            'The model score is in the uncertainty range. This result is not '
+            'classified as REAL or FAKE.'
+            '</div>'
+            if prediction == "INCONCLUSIVE" else ""
+        )}
     </div>
     """)
 
@@ -490,10 +501,6 @@ if current_page == "Home":
             "Explore prediction scores and window-level evidence.",
         )
 
-    st.write("")
-
-    if st.button("Create your account", type="primary"):
-        go_to("Register")
 
 
 # ============================================================
@@ -711,12 +718,17 @@ elif current_page in PRIVATE_PAGES:
 
             fake_count = sum(
                 1 for row in history
-                if row["prediction"] == "FAKE"
+                if str(row.get("prediction", "")).upper() == "FAKE"
             )
 
             real_count = sum(
                 1 for row in history
-                if row["prediction"] == "REAL"
+                if str(row.get("prediction", "")).upper() == "REAL"
+            )
+
+            inconclusive_count = sum(
+                1 for row in history
+                if str(row.get("prediction", "")).upper() == "INCONCLUSIVE"
             )
 
             page_header(
@@ -726,11 +738,12 @@ elif current_page in PRIVATE_PAGES:
                 "and detection activity.",
             )
 
-            m1, m2, m3 = st.columns(3)
+            m1, m2, m3, m4 = st.columns(4)
 
             m1.metric("Total Analyses", total)
             m2.metric("Potential Fake", fake_count)
             m3.metric("Potential Real", real_count)
+            m4.metric("Inconclusive", inconclusive_count)
 
             st.markdown("### Quick Actions")
 
@@ -910,9 +923,12 @@ elif current_page in PRIVATE_PAGES:
                                     raw_result["prediction"]
                                 ).strip().upper()
 
-                                if prediction not in ("REAL", "FAKE"):
+                                if prediction not in (
+                                    "REAL", "FAKE", "INCONCLUSIVE"
+                                ):
                                     raise ValueError(
-                                        "Model returned an invalid prediction."
+                                        "Model returned an unsupported prediction: "
+                                        f"{prediction!r}. Expected REAL, FAKE or INCONCLUSIVE."
                                     )
 
                                 fake_score = get_score(
