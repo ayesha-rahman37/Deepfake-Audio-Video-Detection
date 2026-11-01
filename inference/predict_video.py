@@ -1,7 +1,21 @@
-from pathlib import Path
+"""Run window-level multimodal deepfake inference on a video file.
+
+Example:
+    python inference/predict_video.py --video path/to/video.mp4
+    python inference/predict_video.py --video path/to/video.mp4 --output results/prediction.json
+"""
+
+import argparse
+import json
+import sys
 import subprocess
 import tempfile
 import warnings
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 import cv2
 import imageio_ffmpeg
@@ -14,12 +28,9 @@ from torchvision import transforms
 
 from models.multimodal_model import MultimodalDeepfakeDetector
 
-
-ROOT = Path(__file__).resolve().parents[1]
-
+ROOT = PROJECT_ROOT
 CONFIG_PATH = ROOT / "configs" / "config.yaml"
 CHECKPOINT_PATH = ROOT / "checkpoints" / "multimodal_reliability_best.pt"
-
 THRESHOLD = 0.5
 
 
@@ -606,3 +617,47 @@ def predict_video(video_path):
         ),
 
     }
+
+# --------------------------------------------------
+# 6. COMMAND-LINE INTERFACE
+# --------------------------------------------------
+
+def main():
+    global THRESHOLD
+    parser = argparse.ArgumentParser(
+        description="Multimodal audio-video deepfake detection"
+    )
+    parser.add_argument(
+        "--video", required=True,
+        help="Path to the input video file"
+    )
+    parser.add_argument(
+        "--output", default=None,
+        help="Optional JSON output path"
+    )
+    parser.add_argument(
+        "--threshold", type=float, default=THRESHOLD,
+        help="Fake decision threshold between 0 and 1 (default: 0.5)"
+    )
+    args = parser.parse_args()
+
+    if not 0.0 <= args.threshold <= 1.0:
+        parser.error("--threshold must be between 0 and 1")
+
+    THRESHOLD = args.threshold
+
+    result = predict_video(args.video)
+    rendered = json.dumps(result, indent=2, ensure_ascii=False)
+    print(rendered)
+
+    if args.output:
+        output_path = Path(args.output)
+        if not output_path.is_absolute():
+            output_path = ROOT / output_path
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(rendered, encoding="utf-8")
+        print(f"\nPrediction saved to: {output_path}")
+
+
+if __name__ == "__main__":
+    main()

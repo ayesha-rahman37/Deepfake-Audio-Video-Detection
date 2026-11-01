@@ -1,0 +1,21 @@
+{
+  "split": "test",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\audio_encoder_candidate.pt",
+  "samples_evaluated": 2048,
+  "skipped_batches": 0,
+  "accuracy": 0.85400390625,
+  "precision_fake": 0.7241935483870968,
+  "recall_fake": 0.7781629116117851,
+  "f1_fake": 0.7502088554720133,
+  "roc_auc": 0.9114126727358627,
+  "confusion_matrix_labels_0_1": [
+    [
+      1300,
+      171
+    ],
+    [
+      128,
+      449
+    ]
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "model": "Video-only ResNet50 + BiLSTM",
+  "warning": "Subset experiment; not full test-set performance.",
+  "device": "cuda",
+  "train_samples": 256,
+  "validation_samples": 64,
+  "test_samples": 512,
+  "epochs": 2,
+  "history": [
+    {
+      "epoch": 1,
+      "train": {
+        "loss": 0.6977008348330855,
+        "accuracy": 0.47265625,
+        "precision_fake": 0.4507042253521127,
+        "recall_fake": 0.25,
+        "f1_fake": 0.32160804020100503,
+        "roc_auc": 0.4541015625,
+        "samples": 256,
+        "confusion_matrix": [
+          [
+            89,
+            39
+          ],
+          [
+            96,
+            32
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 0.6932161012664437,
+        "accuracy": 0.5,
+        "precision_fake": 0.0,
+        "recall_fake": 0.0,
+        "f1_fake": 0.0,
+        "roc_auc": 0.46875,
+        "samples": 64,
+        "confusion_matrix": [
+          [
+            32,
+            0
+          ],
+          [
+            32,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "epoch": 2,
+      "train": {
+        "loss": 0.694760168902576,
+        "accuracy": 0.47265625,
+        "precision_fake": 0.46534653465346537,
+        "recall_fake": 0.3671875,
+        "f1_fake": 0.4104803493449782,
+        "roc_auc": 0.4603271484375,
+        "samples": 256,
+        "confusion_matrix": [
+          [
+            74,
+            54
+          ],
+          [
+            81,
+            47
+          ]
+        ]
+      },
+      "validation": {
+        "loss": 0.693821114487946,
+        "accuracy": 0.46875,
+        "precision_fake": 0.4827586206896552,
+        "recall_fake": 0.875,
+        "f1_fake": 0.6222222222222222,
+        "roc_auc": 0.44140625,
+        "samples": 64,
+        "confusion_matrix": [
+          [
+            2,
+            30
+          ],
+          [
+            4,
+            28
+          ]
+        ]
+      }
+    }
+  ],
+  "test": {
+    "loss": 0.6931194753851742,
+    "accuracy": 0.5,
+    "precision_fake": 0.0,
+    "recall_fake": 0.0,
+    "f1_fake": 0.0,
+    "roc_auc": 0.5256118774414062,
+    "samples": 512,
+    "confusion_matrix": [
+      [
+        256,
+        0
+      ],
+      [
+        256,
+        0
+      ]
+    ]
+  }
+}
