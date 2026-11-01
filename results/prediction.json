@@ -1,0 +1,334 @@
+{
+  "prediction": "FAKE",
+  "fake_score": 58.68,
+  "real_score": 41.32,
+  "duration_seconds": 179.1,
+  "device": "cuda",
+  "windows": [
+    {
+      "window": 1,
+      "start_seconds": 0.0,
+      "end_seconds": 5.0,
+      "fake_score": 52.23,
+      "prediction": "FAKE",
+      "video_reliability": 0.3012,
+      "audio_reliability": 0.6988
+    },
+    {
+      "window": 2,
+      "start_seconds": 5.0,
+      "end_seconds": 10.0,
+      "fake_score": 54.68,
+      "prediction": "FAKE",
+      "video_reliability": 0.2994,
+      "audio_reliability": 0.7006
+    },
+    {
+      "window": 3,
+      "start_seconds": 10.0,
+      "end_seconds": 15.0,
+      "fake_score": 57.03,
+      "prediction": "FAKE",
+      "video_reliability": 0.2904,
+      "audio_reliability": 0.7096
+    },
+    {
+      "window": 4,
+      "start_seconds": 15.0,
+      "end_seconds": 20.0,
+      "fake_score": 56.72,
+      "prediction": "FAKE",
+      "video_reliability": 0.2918,
+      "audio_reliability": 0.7082
+    },
+    {
+      "window": 5,
+      "start_seconds": 20.0,
+      "end_seconds": 25.0,
+      "fake_score": 52.65,
+      "prediction": "FAKE",
+      "video_reliability": 0.3034,
+      "audio_reliability": 0.6966
+    },
+    {
+      "window": 6,
+      "start_seconds": 25.0,
+      "end_seconds": 30.0,
+      "fake_score": 57.02,
+      "prediction": "FAKE",
+      "video_reliability": 0.2895,
+      "audio_reliability": 0.7105
+    },
+    {
+      "window": 7,
+      "start_seconds": 30.0,
+      "end_seconds": 35.0,
+      "fake_score": 57.75,
+      "prediction": "FAKE",
+      "video_reliability": 0.2867,
+      "audio_reliability": 0.7133
+    },
+    {
+      "window": 8,
+      "start_seconds": 35.0,
+      "end_seconds": 40.0,
+      "fake_score": 64.74,
+      "prediction": "FAKE",
+      "video_reliability": 0.2347,
+      "audio_reliability": 0.7653
+    },
+    {
+      "window": 9,
+      "start_seconds": 40.0,
+      "end_seconds": 45.0,
+      "fake_score": 58.21,
+      "prediction": "FAKE",
+      "video_reliability": 0.2813,
+      "audio_reliability": 0.7187
+    },
+    {
+      "window": 10,
+      "start_seconds": 45.0,
+      "end_seconds": 50.0,
+      "fake_score": 63.88,
+      "prediction": "FAKE",
+      "video_reliability": 0.2363,
+      "audio_reliability": 0.7637
+    },
+    {
+      "window": 11,
+      "start_seconds": 50.0,
+      "end_seconds": 55.0,
+      "fake_score": 62.18,
+      "prediction": "FAKE",
+      "video_reliability": 0.2541,
+      "audio_reliability": 0.7459
+    },
+    {
+      "window": 12,
+      "start_seconds": 55.0,
+      "end_seconds": 60.0,
+      "fake_score": 58.72,
+      "prediction": "FAKE",
+      "video_reliability": 0.2763,
+      "audio_reliability": 0.7237
+    },
+    {
+      "window": 13,
+      "start_seconds": 60.0,
+      "end_seconds": 65.0,
+      "fake_score": 58.92,
+      "prediction": "FAKE",
+      "video_reliability": 0.2768,
+      "audio_reliability": 0.7232
+    },
+    {
+      "window": 14,
+      "start_seconds": 65.0,
+      "end_seconds": 70.0,
+      "fake_score": 59.82,
+      "prediction": "FAKE",
+      "video_reliability": 0.268,
+      "audio_reliability": 0.732
+    },
+    {
+      "window": 15,
+      "start_seconds": 70.0,
+      "end_seconds": 75.0,
+      "fake_score": 57.61,
+      "prediction": "FAKE",
+      "video_reliability": 0.2855,
+      "audio_reliability": 0.7145
+    },
+    {
+      "window": 16,
+      "start_seconds": 75.0,
+      "end_seconds": 80.0,
+      "fake_score": 58.33,
+      "prediction": "FAKE",
+      "video_reliability": 0.2771,
+      "audio_reliability": 0.7229
+    },
+    {
+      "window": 17,
+      "start_seconds": 80.0,
+      "end_seconds": 85.0,
+      "fake_score": 59.68,
+      "prediction": "FAKE",
+      "video_reliability": 0.2712,
+      "audio_reliability": 0.7288
+    },
+    {
+      "window": 18,
+      "start_seconds": 85.0,
+      "end_seconds": 90.0,
+      "fake_score": 59.22,
+      "prediction": "FAKE",
+      "video_reliability": 0.2694,
+      "audio_reliability": 0.7306
+    },
+    {
+      "window": 19,
+      "start_seconds": 90.0,
+      "end_seconds": 95.0,
+      "fake_score": 57.19,
+      "prediction": "FAKE",
+      "video_reliability": 0.2863,
+      "audio_reliability": 0.7137
+    },
+    {
+      "window": 20,
+      "start_seconds": 95.0,
+      "end_seconds": 100.0,
+      "fake_score": 58.07,
+      "prediction": "FAKE",
+      "video_reliability": 0.2726,
+      "audio_reliability": 0.7274
+    },
+    {
+      "window": 21,
+      "start_seconds": 100.0,
+      "end_seconds": 105.0,
+      "fake_score": 59.27,
+      "prediction": "FAKE",
+      "video_reliability": 0.2645,
+      "audio_reliability": 0.7355
+    },
+    {
+      "window": 22,
+      "start_seconds": 105.0,
+      "end_seconds": 110.0,
+      "fake_score": 56.95,
+      "prediction": "FAKE",
+      "video_reliability": 0.2728,
+      "audio_reliability": 0.7272
+    },
+    {
+      "window": 23,
+      "start_seconds": 110.0,
+      "end_seconds": 115.0,
+      "fake_score": 60.15,
+      "prediction": "FAKE",
+      "video_reliability": 0.2655,
+      "audio_reliability": 0.7345
+    },
+    {
+      "window": 24,
+      "start_seconds": 115.0,
+      "end_seconds": 120.0,
+      "fake_score": 58.74,
+      "prediction": "FAKE",
+      "video_reliability": 0.2785,
+      "audio_reliability": 0.7215
+    },
+    {
+      "window": 25,
+      "start_seconds": 120.0,
+      "end_seconds": 125.0,
+      "fake_score": 60.24,
+      "prediction": "FAKE",
+      "video_reliability": 0.2673,
+      "audio_reliability": 0.7327
+    },
+    {
+      "window": 26,
+      "start_seconds": 125.0,
+      "end_seconds": 130.0,
+      "fake_score": 56.13,
+      "prediction": "FAKE",
+      "video_reliability": 0.2901,
+      "audio_reliability": 0.7099
+    },
+    {
+      "window": 27,
+      "start_seconds": 130.0,
+      "end_seconds": 135.0,
+      "fake_score": 60.45,
+      "prediction": "FAKE",
+      "video_reliability": 0.2668,
+      "audio_reliability": 0.7332
+    },
+    {
+      "window": 28,
+      "start_seconds": 135.0,
+      "end_seconds": 140.0,
+      "fake_score": 61.86,
+      "prediction": "FAKE",
+      "video_reliability": 0.2485,
+      "audio_reliability": 0.7515
+    },
+    {
+      "window": 29,
+      "start_seconds": 140.0,
+      "end_seconds": 145.0,
+      "fake_score": 58.89,
+      "prediction": "FAKE",
+      "video_reliability": 0.2773,
+      "audio_reliability": 0.7227
+    },
+    {
+      "window": 30,
+      "start_seconds": 145.0,
+      "end_seconds": 150.0,
+      "fake_score": 64.66,
+      "prediction": "FAKE",
+      "video_reliability": 0.2337,
+      "audio_reliability": 0.7663
+    },
+    {
+      "window": 31,
+      "start_seconds": 150.0,
+      "end_seconds": 155.0,
+      "fake_score": 57.18,
+      "prediction": "FAKE",
+      "video_reliability": 0.2831,
+      "audio_reliability": 0.7169
+    },
+    {
+      "window": 32,
+      "start_seconds": 155.0,
+      "end_seconds": 160.0,
+      "fake_score": 56.84,
+      "prediction": "FAKE",
+      "video_reliability": 0.2871,
+      "audio_reliability": 0.7129
+    },
+    {
+      "window": 33,
+      "start_seconds": 160.0,
+      "end_seconds": 165.0,
+      "fake_score": 61.16,
+      "prediction": "FAKE",
+      "video_reliability": 0.26,
+      "audio_reliability": 0.74
+    },
+    {
+      "window": 34,
+      "start_seconds": 165.0,
+      "end_seconds": 170.0,
+      "fake_score": 63.08,
+      "prediction": "FAKE",
+      "video_reliability": 0.2426,
+      "audio_reliability": 0.7574
+    },
+    {
+      "window": 35,
+      "start_seconds": 170.0,
+      "end_seconds": 175.0,
+      "fake_score": 60.42,
+      "prediction": "FAKE",
+      "video_reliability": 0.2656,
+      "audio_reliability": 0.7344
+    },
+    {
+      "window": 36,
+      "start_seconds": 175.0,
+      "end_seconds": 179.1,
+      "fake_score": 50.3,
+      "prediction": "FAKE",
+      "video_reliability": 0.2655,
+      "audio_reliability": 0.7345
+    }
+  ],
+  "warning": "Research prototype: scores are model outputs, not calibrated probabilities or proof of authenticity."
+}

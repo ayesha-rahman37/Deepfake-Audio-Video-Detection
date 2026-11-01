@@ -149,6 +149,7 @@ class LAVDFDataset(Dataset):
                 "video_path",
                 "sample_id",
                 "fake_periods",
+                "modify_video",
             }
             available_columns = set(records.fieldnames or [])
             missing_columns = required_columns - available_columns
@@ -224,6 +225,15 @@ class LAVDFDataset(Dataset):
                         for period_start, period_end in fake_periods
                     )
 
+                    # Keep the original window-level label for multimodal/audio
+                    # experiments, and also derive a video-specific label.
+                    # A window is video-fake only when the source record has
+                    # video manipulation AND this window overlaps an annotated
+                    # fake interval.
+                    modify_video = str(
+                        record.get("modify_video", "False")
+                    ).strip().lower() in {"true", "1", "yes"}
+
                     self.samples.append(
                         {
                             "video_path": video_path,
@@ -231,6 +241,8 @@ class LAVDFDataset(Dataset):
                             "start": start,
                             "end": end,
                             "label": int(is_fake),
+                            "video_label": int(is_fake and modify_video),
+                            "modify_video": modify_video,
                         }
                     )
                     start = end
@@ -426,6 +438,7 @@ class LAVDFDataset(Dataset):
             "video": video,  # (frames_per_window, 3, image_size, image_size)
             "audio": audio,  # (64, time_frames)
             "label": torch.tensor(sample["label"], dtype=torch.long),
+            "video_label": torch.tensor(sample["video_label"], dtype=torch.long),
         }
 
 

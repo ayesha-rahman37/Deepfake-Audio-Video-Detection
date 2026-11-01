@@ -1,0 +1,117 @@
+{
+  "experiment": "traditional_ml_on_frozen_multimodal_embeddings",
+  "feature_definition": "512-d video embedding + 256-d audio embedding + 4 quality indicators",
+  "fusion_mode_used_for_feature_extraction": "reliability",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\multimodal_reliability_best.pt",
+  "train_split": "train",
+  "test_split": "test",
+  "train_samples": 2048,
+  "test_samples": 512,
+  "train_class_counts": {
+    "real": 1024,
+    "fake": 1024
+  },
+  "test_class_counts": {
+    "real": 256,
+    "fake": 256
+  },
+  "feature_dim": 772,
+  "seed": 42,
+  "results": [
+    {
+      "model": "SVM_RBF",
+      "accuracy": 0.796875,
+      "balanced_accuracy": 0.796875,
+      "precision_fake": 0.7602739726027398,
+      "recall_fake": 0.8671875,
+      "f1_fake": 0.8102189781021898,
+      "macro_f1": 0.7958657915721032,
+      "roc_auc": 0.8879928588867188,
+      "confusion_matrix": [
+        [
+          186,
+          70
+        ],
+        [
+          34,
+          222
+        ]
+      ],
+      "classification_report": {
+        "real": {
+          "precision": 0.8454545454545455,
+          "recall": 0.7265625,
+          "f1-score": 0.7815126050420168,
+          "support": 256.0
+        },
+        "fake": {
+          "precision": 0.7602739726027398,
+          "recall": 0.8671875,
+          "f1-score": 0.8102189781021898,
+          "support": 256.0
+        },
+        "accuracy": 0.796875,
+        "macro avg": {
+          "precision": 0.8028642590286426,
+          "recall": 0.796875,
+          "f1-score": 0.7958657915721032,
+          "support": 512.0
+        },
+        "weighted avg": {
+          "precision": 0.8028642590286426,
+          "recall": 0.796875,
+          "f1-score": 0.7958657915721032,
+          "support": 512.0
+        }
+      }
+    },
+    {
+      "model": "Random_Forest",
+      "accuracy": 0.796875,
+      "balanced_accuracy": 0.796875,
+      "precision_fake": 0.7676056338028169,
+      "recall_fake": 0.8515625,
+      "f1_fake": 0.8074074074074075,
+      "macro_f1": 0.7962656871747782,
+      "roc_auc": 0.8780364990234375,
+      "confusion_matrix": [
+        [
+          190,
+          66
+        ],
+        [
+          38,
+          218
+        ]
+      ],
+      "classification_report": {
+        "real": {
+          "precision": 0.8333333333333334,
+          "recall": 0.7421875,
+          "f1-score": 0.7851239669421488,
+          "support": 256.0
+        },
+        "fake": {
+          "precision": 0.7676056338028169,
+          "recall": 0.8515625,
+          "f1-score": 0.8074074074074075,
+          "support": 256.0
+        },
+        "accuracy": 0.796875,
+        "macro avg": {
+          "precision": 0.8004694835680751,
+          "recall": 0.796875,
+          "f1-score": 0.7962656871747782,
+          "support": 512.0
+        },
+        "weighted avg": {
+          "precision": 0.8004694835680751,
+          "recall": 0.796875,
+          "f1-score": 0.7962656871747782,
+          "support": 512.0
+        }
+      }
+    }
+  ],
+  "caveat": "Subset-based embedding baseline. Compare only on the same fixed test indices as other models; this is not a full-test result or raw-feature classical baseline."
+}

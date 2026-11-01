@@ -1,0 +1,26 @@
+{
+  "model": "Video-only ResNet50 + BiLSTM",
+  "checkpoint": "D:\\UAP(Batch-53)\\ML Lab\\Deepfake\\checkpoints\\video_only_v2_best.pt",
+  "split": "test",
+  "samples": 256,
+  "threshold": 0.5,
+  "loss": 0.6954355956986547,
+  "accuracy": 0.5,
+  "balanced_accuracy": 0.5,
+  "precision_fake": 0.0,
+  "recall_fake": 0.0,
+  "f1_fake": 0.0,
+  "macro_f1": 0.3333333333333333,
+  "roc_auc": 0.4810791015625,
+  "confusion_matrix_labels_0_1": [
+    [
+      128,
+      0
+    ],
+    [
+      128,
+      0
+    ]
+  ],
+  "warning": "Subset evaluation."
+}
