@@ -288,7 +288,38 @@ The dataset manifest audit is saved as `results/dataset_manifest_audit.json` whe
 
 A repaired/re-encoded sample video may be used for local pipeline testing, but do not commit user-provided videos or other private media to the repository. Store local SQLite databases, temporary media, datasets, checkpoints, virtual environments, and machine-specific files outside version control.
 
-## 13. Remaining evaluation work
+## 13. Temporal-Order Ablation
 
-The current experiments do not yet establish temporal-order sensitivity, calibrated confidence, cross-dataset generalization, or forensic reliability. A dedicated temporal-order ablation and a structured false-positive/false-negative review remain useful follow-up analyses. Do not claim these experiments are complete unless their result files and protocols are added to `results/` and documented here.
+A preliminary temporal-order ablation was run on a balanced
+256-window test subset by comparing normal and reversed frame sequences.
 
+- Normal-order and reversed-order metrics were identical.
+- Mean absolute fake-score change: approximately 8.3e-08.
+- Prediction flips: 0.
+
+This indicates that the evaluated checkpoint was effectively
+insensitive to frame-order reversal under this test setup.
+It does not demonstrate successful temporal reasoning.
+
+## 14. Error Analysis
+
+The full-test error-only export was reviewed in
+`ERROR_ANALYSIS.md` and summarized in
+`results/error_analysis_summary.json`.
+
+- False positives: 16,754 windows.
+- False negatives: 1,181 windows.
+- Total misclassified windows: 17,935.
+
+False positives substantially outnumber false negatives.
+The error-only export cannot independently reproduce
+the full evaluation metrics.
+
+## 15. Remaining Research Limitations
+
+1. Improve temporal reasoning and video-only performance.
+2. Calibrate model scores using a dedicated calibration set.
+3. Evaluate cross-dataset generalization.
+4. Validate robustness using actual re-encoded videos.
+5. Reduce the substantial false-positive burden.
+6. Further investigate forensic reliability.
