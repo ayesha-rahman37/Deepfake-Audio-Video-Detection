@@ -323,3 +323,93 @@ the full evaluation metrics.
 4. Validate robustness using actual re-encoded videos.
 5. Reduce the substantial false-positive burden.
 6. Further investigate forensic reliability.
+
+## 16. Application Upload Configuration
+
+The Streamlit application supports video uploads up to 500 MB.
+
+The upload size is configured in `.streamlit/config.toml`:
+
+```toml
+[server]
+maxUploadSize = 500
+```
+
+The application validates uploaded file extensions, empty files, and maximum file size before processing.
+
+## 17. Decision Operating Points
+
+The application provides two decision policies.
+
+### Conservative Policy
+
+- Fake score <= 0.40: REAL
+- Fake score >= 0.60: FAKE
+- Between 0.40 and 0.60: INCONCLUSIVE
+
+This policy preserves an uncertainty region around the decision boundary.
+
+### Optimized Threshold Policy
+
+- Threshold: 0.51775074
+- Fake score below threshold: REAL
+- Fake score at or above threshold: FAKE
+
+The threshold was selected using the development split to maximize fake precision while maintaining fake recall of at least 90%.
+
+This is post-hoc operating-point optimization. It does not retrain the model, modify model weights, or calibrate its scores.
+
+### Test-set comparison
+
+| Metric | Default 0.50 | Optimized 0.51775 |
+|---|---:|---:|
+| Accuracy | 68.24% | 71.54% |
+| Balanced Accuracy | 72.80% | 74.64% |
+| Fake Precision | 55.84% | 59.32% |
+| Fake Recall | 94.72% | 89.55% |
+| Fake F1 | 70.26% | 71.37% |
+| ROC-AUC | 79.14% | 79.14% |
+
+The optimized operating point reduced false positives by 3,019 (18.02%), while fake recall decreased by 5.17 percentage points.
+
+These results demonstrate a precision-recall trade-off rather than an improvement in the underlying learned model.
+
+## 18. Application Architecture
+
+The user-facing application is implemented using Streamlit.
+
+It includes:
+- User registration and login
+- Video upload and validation
+- Multimodal video analysis
+- Conservative and optimized decision policies
+- Window-level evidence
+- Detection history
+- Saved detection reports
+- Local SQLite persistence
+
+The application uses `inference/predict_video.py` for video analysis.
+
+## 19. Model Checkpoint Setup
+
+Model checkpoint files are excluded from Git version control.
+
+Place the trained reliability-aware checkpoint at the path expected by the inference implementation:
+
+`checkpoints/multimodal_reliability_best.pt`
+
+The checkpoint must be obtained separately before running inference on a fresh installation.
+
+## 20. Current Project Status and Future Work
+
+The project includes a working Streamlit application and a multimodal deepfake detection research pipeline.
+
+Remaining research directions include:
+- Improving video-only representation learning.
+- Improving temporal-order sensitivity.
+- Calibrating model scores using a dedicated calibration set.
+- Evaluating cross-dataset generalization.
+- Testing robustness on genuinely re-encoded videos.
+- Reducing false positives and improving forensic reliability.
+
+The application is an academic research prototype. Its predictions are not forensic proof and should not be used as the sole basis for high-stakes decisions.
