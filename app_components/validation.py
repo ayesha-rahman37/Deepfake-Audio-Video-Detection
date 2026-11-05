@@ -1,7 +1,7 @@
 
 from pathlib import Path
 
-MAX_FILE_SIZE_MB = 200
+MAX_FILE_SIZE_MB = 500
 
 SUPPORTED_EXTENSIONS = {
     ".mp4",
@@ -24,7 +24,7 @@ def validate_uploaded_file(uploaded_file):
     file_size_mb = uploaded_file.size / (1024 * 1024)
 
     if file_size_mb > MAX_FILE_SIZE_MB:
-        return False, "File size must be 200 MB or less."
+        return False, "File size must be 500 MB or less."
 
     if uploaded_file.size == 0:
         return False, "The uploaded file is empty."

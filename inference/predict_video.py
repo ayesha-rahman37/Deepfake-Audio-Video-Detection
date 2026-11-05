@@ -31,14 +31,16 @@ from models.multimodal_model import MultimodalDeepfakeDetector
 ROOT = PROJECT_ROOT
 CONFIG_PATH = ROOT / "configs" / "config.yaml"
 CHECKPOINT_PATH = ROOT / "checkpoints" / "multimodal_reliability_best.pt"
-THRESHOLD = 0.5
+DEFAULT_THRESHOLD = 0.5
 UNCERTAINTY_MARGIN = 0.10
+OPTIMIZED_THRESHOLD = 0.5177507400512695
 
-def classify_score(probability_fake):
-    """Return a cautious label; scores near 0.5 remain inconclusive."""
-    if probability_fake >= THRESHOLD + UNCERTAINTY_MARGIN:
+def classify_score(probability_fake, threshold=DEFAULT_THRESHOLD,
+                   uncertainty_margin=UNCERTAINTY_MARGIN):
+    """Conservative three-way classification around the selected threshold."""
+    if probability_fake >= threshold + uncertainty_margin:
         return "FAKE"
-    if probability_fake <= THRESHOLD - UNCERTAINTY_MARGIN:
+    if probability_fake <= threshold - uncertainty_margin:
         return "REAL"
     return "INCONCLUSIVE"
 
@@ -363,7 +365,19 @@ def extract_window(
 # 5. MAIN VIDEO PREDICTION
 # --------------------------------------------------
 
-def predict_video(video_path):
+def predict_video(video_path, operating_point="conservative"):
+    """Analyze a video using the conservative or optimized binary operating point."""
+    if operating_point == "conservative":
+        decision_threshold = DEFAULT_THRESHOLD
+        decision_margin = UNCERTAINTY_MARGIN
+        decision_mode_label = "Conservative three-way (0.40 / 0.60)"
+    elif operating_point == "optimized":
+        decision_threshold = OPTIMIZED_THRESHOLD
+        decision_margin = 0.0
+        decision_mode_label = "Optimized binary (0.51775)"
+    else:
+        raise ValueError("operating_point must be 'conservative' or 'optimized'.")
+
 
     video_path = Path(video_path)
 
@@ -502,7 +516,9 @@ def predict_video(video_path):
 
         fake_score = probability_fake * 100
 
-        window_prediction = classify_score(probability_fake)
+        window_prediction = classify_score(
+            probability_fake, decision_threshold, decision_margin
+        )
 
         results.append({
 
@@ -571,7 +587,9 @@ def predict_video(video_path):
 
     final_probability = average_fake_score / 100.0
 
-    final_prediction = classify_score(final_probability)
+    final_prediction = classify_score(
+        final_probability, decision_threshold, decision_margin
+    )
 
     # ----------------------------------------------
     # FINAL RESULT
@@ -600,13 +618,17 @@ def predict_video(video_path):
 
         "windows": results,
 
+        "operating_point": decision_mode_label,
         "decision_thresholds": {
-            "likely_real_max_fake_score": round((THRESHOLD - UNCERTAINTY_MARGIN) * 100, 2),
-            "inconclusive_range": [
-                round((THRESHOLD - UNCERTAINTY_MARGIN) * 100, 2),
-                round((THRESHOLD + UNCERTAINTY_MARGIN) * 100, 2),
-            ],
-            "likely_fake_min_fake_score": round((THRESHOLD + UNCERTAINTY_MARGIN) * 100, 2),
+            "threshold": round(decision_threshold * 100, 4),
+            "uncertainty_margin": round(decision_margin * 100, 2),
+            "likely_real_max_fake_score": round((decision_threshold - decision_margin) * 100, 2),
+            "inconclusive_range": (
+                [round((decision_threshold - decision_margin) * 100, 2),
+                 round((decision_threshold + decision_margin) * 100, 2)]
+                if decision_margin > 0 else None
+            ),
+            "likely_fake_min_fake_score": round((decision_threshold + decision_margin) * 100, 2),
         },
         "warning": (
             "Research prototype: scores are model outputs, not calibrated "
@@ -622,30 +644,22 @@ def predict_video(video_path):
 # --------------------------------------------------
 
 def main():
-    global THRESHOLD
     parser = argparse.ArgumentParser(
         description="Multimodal audio-video deepfake detection"
     )
+    parser.add_argument("--video", required=True,
+                        help="Path to the input video file")
+    parser.add_argument("--output", default=None,
+                        help="Optional JSON output path")
     parser.add_argument(
-        "--video", required=True,
-        help="Path to the input video file"
-    )
-    parser.add_argument(
-        "--output", default=None,
-        help="Optional JSON output path"
-    )
-    parser.add_argument(
-        "--threshold", type=float, default=THRESHOLD,
-        help="Fake decision threshold between 0 and 1 (default: 0.5)"
+        "--operating-point",
+        choices=["conservative", "optimized"],
+        default="conservative",
+        help="Decision policy: cautious three-way or optimized binary"
     )
     args = parser.parse_args()
 
-    if not 0.0 <= args.threshold <= 1.0:
-        parser.error("--threshold must be between 0 and 1")
-
-    THRESHOLD = args.threshold
-
-    result = predict_video(args.video)
+    result = predict_video(args.video, operating_point=args.operating_point)
     rendered = json.dumps(result, indent=2, ensure_ascii=False)
     print(rendered)
 
@@ -655,7 +669,7 @@ def main():
             output_path = ROOT / output_path
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(rendered, encoding="utf-8")
-        print(f"\nPrediction saved to: {output_path}")
+        print(f"\\nPrediction saved to: {output_path}")
 
 
 if __name__ == "__main__":

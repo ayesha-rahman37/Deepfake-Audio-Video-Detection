@@ -36,12 +36,21 @@ def test_unsupported_format():
 
 
 def test_oversized_file():
-    uploaded = FakeUpload(
-        "large.mp4", b"x" * (200 * 1024 * 1024 + 1)
-    )
+    uploaded = FakeUpload("large.mp4", b"x")
+    uploaded.size = 500 * 1024 * 1024 + 1
+
     valid, message = validate_uploaded_file(uploaded)
     assert not valid
-    assert "200 MB" in message
+    assert "500 MB" in message
+
+
+def test_file_exactly_500_mb_is_accepted():
+    uploaded = FakeUpload("maximum.mp4", b"x")
+    uploaded.size = 500 * 1024 * 1024
+
+    valid, message = validate_uploaded_file(uploaded)
+    assert valid
+    assert message == "File is valid."
 
 
 def test_valid_video_upload():

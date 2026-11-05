@@ -1,4 +1,3 @@
-
 import pytest
 
 from app_components.validation import validate_uploaded_file
@@ -27,12 +26,21 @@ def test_unsupported_format():
 
 
 def test_file_too_large():
-    file = MockUploadedFile("video.mp4", 201 * 1024 * 1024)
+    file = MockUploadedFile("video.mp4", 501 * 1024 * 1024)
 
     valid, message = validate_uploaded_file(file)
 
     assert valid is False
-    assert message == "File size must be 200 MB or less."
+    assert message == "File size must be 500 MB or less."
+
+
+def test_file_exactly_500_mb_is_accepted():
+    file = MockUploadedFile("video.mp4", 500 * 1024 * 1024)
+
+    valid, message = validate_uploaded_file(file)
+
+    assert valid is True
+    assert message == "File is valid."
 
 
 def test_zero_byte_file():

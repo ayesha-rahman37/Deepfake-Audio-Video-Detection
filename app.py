@@ -1,4 +1,4 @@
-
+from app_components.validation import validate_uploaded_file
 from pathlib import Path
 import os
 import tempfile
@@ -795,7 +795,7 @@ elif current_page in PRIVATE_PAGES:
                 key="video_uploader",
                 help=(
                     "Supported formats: MP4, MOV, AVI, MKV and WEBM. "
-                    "Maximum file size: 200 MB."
+                    "Maximum file size: 500 MB."
                 ),
             )
 
@@ -853,6 +853,26 @@ elif current_page in PRIVATE_PAGES:
 
                     st.markdown("### Run Detection")
 
+                    operating_point_label = st.selectbox(
+                        "Decision policy",
+                        options=[
+                            "Conservative (recommended): REAL / INCONCLUSIVE / FAKE",
+                            "Optimized threshold: binary REAL / FAKE",
+                        ],
+                        index=0,
+                        help=(
+                            "The optimized threshold (0.51775) was selected on the "
+                            "development set to maximize fake precision while "
+                            "maintaining at least 90% fake recall. It removes the "
+                            "INCONCLUSIVE band and trades some recall for fewer false positives."
+                        ),
+                    )
+                    operating_point = (
+                        "optimized"
+                        if operating_point_label.startswith("Optimized")
+                        else "conservative"
+                    )
+
                     if not CHECKPOINT_PATH.is_file():
 
                         st.error(
@@ -894,7 +914,10 @@ elif current_page in PRIVATE_PAGES:
                                     "Analyzing visual and audio information..."
                                 ):
 
-                                    raw_result = predict_video(temp_path)
+                                    raw_result = predict_video(
+                                        temp_path,
+                                        operating_point=operating_point,
+                                    )
 
                                 if not isinstance(raw_result, dict):
                                     raise TypeError(
@@ -1283,6 +1306,10 @@ elif current_page in PRIVATE_PAGES:
                     })
 
                     render_score_bars(fake_score, real_score)
+
+                    operating_point_name = result.get("operating_point")
+                    if operating_point_name:
+                        st.caption(f"Decision policy used: {operating_point_name}")
 
                     st.info(
                         "These percentages are model output scores. "
