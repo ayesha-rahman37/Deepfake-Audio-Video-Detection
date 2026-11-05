@@ -16,7 +16,6 @@ from app_components.auth import (
     get_detection_by_id,
 )
 from app_components.theme import apply_theme
-from app_components.validation import validate_uploaded_file
 from inference.predict_video import predict_video
 
 
