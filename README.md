@@ -274,6 +274,7 @@ Streamlit application from the project root:
 ``` powershell
 python -m streamlit run app.py
 ```
+Or, streamlit run app.py
 
 ## 7. Evaluation scripts and outputs
 
